@@ -35,17 +35,17 @@ import pathlib
 import sys
 import argparse
 
-from geneflowgeometries import simulate
+from geneflowgeometries.simulate import ancestral_deme_sequences
 from geneflowgeometries import calculate
 
 def main():
     parser = argparse.ArgumentParser(description=None)
-    parser.add_argument(
-            "src_paths",
-            action="store",
-            nargs="+",
-            metavar="FILE",
-            help="Path to source file(s).")
+#    parser.add_argument(
+#            "src_paths",
+#            action="store",
+#            nargs="+",
+#            metavar="FILE",
+#            help="Path to source file(s).")
 
     parser.add_argument(
         "-S",
@@ -56,30 +56,30 @@ def main():
     )
     parser.add_argument(
         "-G",
-        "--Geometries",
+        "--geometry",
         action="store",
         default='complete graph',
         help="Network/graph to simulate. Options: Complete, chain, or FILE [default=%(default)s].",
     )
     parser.add_argument(
         "-N",
-        "--Number-of-chromosomes-per-deme",
+        "--number-of-chromosomes-per-deme",
         action="store",
-        default=1000,
+        default=100,
         help="Migration rate across demes [default=%(default)s].",
     )
-   parser.add_argument(
+    parser.add_argument(
         "-P",
-        "--Number-of-chromosomes-per-invdividual",
+        "--number-of-chromosomes-per-invdividual",
         action="store",
         default=2,
         help="Migration rate across demes [default=%(default)s].",
     )
     parser.add_argument(
         "-K",
-        "--Number-of-demes",
+        "--number-of-demes",
         action="store",
-        default=9,
+        default=4,
         help="Migration rate across demes [default=%(default)s].",
     ) 
     parser.add_argument(
@@ -100,24 +100,24 @@ def main():
         "-mut",
         "--mutation-rate",
         action="store",
-        default=10^-4,
+        default=0.0004,
         help="Mutation rate for gene simulaiton [default=%(default)s].",
     )
-   parser.add_argument(
+    parser.add_argument(
         "-L",
         "--sequence-length",
         action="store",
-        default=10^-4,
+        default=1000,
         help="Mutation rate for gene simulaiton [default=%(default)s].",
     )
-   parser.add_argument(
+    parser.add_argument(
         "-mean",
         "--mean",
         action="store",
         default=1,
         help="Starting mean for simulating continous varible[default=%(default)s].",
     )
-   parser.add_argument(
+    parser.add_argument(
         "-std",
         "--standard-deviation",
         action="store",
@@ -128,7 +128,7 @@ def main():
         "-simT",
         "--simulation-time",
         action="store",
-        default=1000,
+        default=100,
         help="Number of trials/generations to run simulation for [default=%(default)s].",
     )
     parser.add_argument(
@@ -146,9 +146,23 @@ def main():
     args = parser.parse_args()
     print("Hello, world.")
     
-    #make config class dictionary 
+    #Pass args
+    Geometry = args.geometry
+    number_of_chromosomes = args.number_of_chromosomes_per_deme
+    number_of_ploidy = args.number_of_chromosomes_per_invdividual
+    number_of_demes = args.number_of_demes
+    migration_rate = args.migration_rate
+    restriction_rate = args.restriction_rate
+    mutation_rate = args.mutation_rate
+    sequence_length = args.sequence_length
+    simT = args.simulation_time
     
-    simulate.ancestral_deme_sequences()
+    #make config class dictionary 
+    print(dir(ancestral_deme_sequences))
+    ancestral_deme_sequences.ancestral_deme_sequences(Geometry, number_of_chromosomes,
+                             number_of_ploidy, number_of_demes, migration_rate, 
+                             restriction_rate, mutation_rate, sequence_length,
+                             simT)
     
     
 

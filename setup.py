@@ -30,7 +30,7 @@ setup(
     name=__project__,
     version=__version__,
     author="Adrian Ortiz-Velez",
-    authors=["Adrian Ortiz-Velez","Jeet Sukumaran",
+    authors=["Adrian Ortiz-Velez","Jeet Sukumaran"],
     author_email="aortizsax@gmail.com",
     packages=find_packages("src"),
     package_dir={"": "src"},

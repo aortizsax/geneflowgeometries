@@ -47,6 +47,12 @@ import string
 
 import random 
 
+# Classes
+class Chromosome:
+    def __init__(self, sequence, ancenstral_deme):
+        self.sequence = sequence
+        ancenstral_deme = ancenstral_deme 
+
 
 
 alphabet_code = {'A':'0','C':'1','G':'2','T':'3'}
@@ -57,7 +63,7 @@ alphabet = string.ascii_lowercase
 def ancestral_deme_sequences(Geometry, number_of_chromosomes,
                              number_of_ploidy, number_of_demes, migration_rate, 
                              restriction_rate, mutation_rate, sequence_length,
-                             simT)
+                             number_generations):
     
     demes = [[]] * number_of_demes
     labels=[]
@@ -66,41 +72,39 @@ def ancestral_deme_sequences(Geometry, number_of_chromosomes,
         
     for i, deme_sequences in enumerate(demes):
         seq = ''
-        for j in range(length_sequence):
+        for j in range(sequence_length):
             seq += str(random.randint(0,3))
-        demes[i] = [seq] * N
+        demes[i] = [seq] * number_of_chromosomes
+
     for seq in demes:
         print(seq[0])
         
     for trial in range(number_generations):
         temp_demes = []
         for i, deme_sequences in enumerate(demes):
-            temp_pops.append(deme_sequences.copy())
+            temp_demes.append(deme_sequences.copy())
         
         #simulate coal foreward in time
-        for i, temp_sequences in enumerate(temp_pops):
+        for i, temp_sequences in enumerate(temp_demes):
             temp_draws = []
             for j, deme_sequences in enumerate(demes):
-                for k in range(int(N / number_cells)):
-                    draw = random.randint(0,N-1)
-                    temp_draws.append(pops[j][draw])
+                for k in range(int(number_of_chromosomes / number_of_demes)):
+                    draw = random.randint(0,number_of_chromosomes-1)
+                    temp_draws.append(demes[j][draw])
                 random.shuffle(temp_draws)
-                temp_pops[i] = temp_draws
+                temp_demes[i] = temp_draws
 
         #update demes/pops with temp
-        pops = temp_pops
+        pops = temp_demes
         
         
         #mutate function
         for i, deme_sequences in enumerate(demes):
             for j,sequence  in enumerate(deme_sequences):
                 for k, allele in enumerate(sequence):
-                    if random.randint(0,int(3*mu/4))==0:
-                        print(i,j,demes[i][j])
-                        print(demes[i][j][k],demes[i][j][:k], str(random.randint(0,3)), demes[i][j][k+1:])
+                    if random.randint(0,int(0.75 *mutation_rate))==0:
                         demes[i][j] = demes[i][j][:k] + str(random.randint(0,3)) + demes[i][j][k+1:]
-                        print(len(demes[i][j]))
-
+                        
 
     taxon_labels = [] 
     csv_list = [',IDV,SUBPOP']
@@ -109,18 +113,19 @@ def ancestral_deme_sequences(Geometry, number_of_chromosomes,
         
         for chromose_count, sequence in enumerate(deme):
             sequence_bases = ''
-
+            print(sequence)
             for base in sequence:
-                sequence_bases += code_alphabet[base]
+            
+                sequence_bases += code_alphabet[str(base)]
 
             fasta_list.append('>'+str(deme_count)
                               +'.chromsome.'+str(chromose_count))
             
             csv_list.append(str(deme_count)
                               +'.chromsome.'+str(chromose_count)+
-                  ','+str(pop_count)+'.'+
+                  ','+str(deme_count)+'.'+
                   str(math.floor(chromose_count/2))+
-                           ','+str(pop_count))
+                           ','+str(deme_count))
             
             fasta_list.append(sequence_bases)
         print( )
