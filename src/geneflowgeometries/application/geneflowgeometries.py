@@ -35,6 +35,9 @@ import pathlib
 import sys
 import argparse
 
+from geneflowgeometries import simulate
+from geneflowgeometries import calculate
+
 def main():
     parser = argparse.ArgumentParser(description=None)
     parser.add_argument(
@@ -43,6 +46,98 @@ def main():
             nargs="+",
             metavar="FILE",
             help="Path to source file(s).")
+
+    parser.add_argument(
+        "-S",
+        "--simulate-sequences-or-continous",
+        action="store",
+        default='sequences',
+        help="Choose to simulate sequences or continous variable [default=%(default)s].",
+    )
+    parser.add_argument(
+        "-G",
+        "--Geometries",
+        action="store",
+        default='complete graph',
+        help="Network/graph to simulate. Options: Complete, chain, or FILE [default=%(default)s].",
+    )
+    parser.add_argument(
+        "-N",
+        "--Number-of-chromosomes-per-deme",
+        action="store",
+        default=1000,
+        help="Migration rate across demes [default=%(default)s].",
+    )
+   parser.add_argument(
+        "-P",
+        "--Number-of-chromosomes-per-invdividual",
+        action="store",
+        default=2,
+        help="Migration rate across demes [default=%(default)s].",
+    )
+    parser.add_argument(
+        "-K",
+        "--Number-of-demes",
+        action="store",
+        default=9,
+        help="Migration rate across demes [default=%(default)s].",
+    ) 
+    parser.add_argument(
+        "-m",
+        "--migration-rate",
+        action="store",
+        default=1,
+        help="Migration rate across demes [default=%(default)s].",
+    )
+    parser.add_argument(
+        "-R",
+        "--restriction-rate",
+        action="store",
+        default=0,
+        help="Restriction rate across demes [default=%(default)s].",
+    )
+    parser.add_argument(
+        "-mut",
+        "--mutation-rate",
+        action="store",
+        default=10^-4,
+        help="Mutation rate for gene simulaiton [default=%(default)s].",
+    )
+   parser.add_argument(
+        "-L",
+        "--sequence-length",
+        action="store",
+        default=10^-4,
+        help="Mutation rate for gene simulaiton [default=%(default)s].",
+    )
+   parser.add_argument(
+        "-mean",
+        "--mean",
+        action="store",
+        default=1,
+        help="Starting mean for simulating continous varible[default=%(default)s].",
+    )
+   parser.add_argument(
+        "-std",
+        "--standard-deviation",
+        action="store",
+        default=1,
+        help="Starting standard deviation for simulating continous varible[default=%(default)s].",
+    )
+    parser.add_argument(
+        "-simT",
+        "--simulation-time",
+        action="store",
+        default=1000,
+        help="Number of trials/generations to run simulation for [default=%(default)s].",
+    )
+    parser.add_argument(
+        "-id",
+        "--log-id",
+        action="store",
+        default="log-DATE",
+        help="Filename for log files [default=%(default)s].",
+    )
     parser.add_argument(
             "-o", "--output-prefix",
             action="store",
@@ -50,6 +145,12 @@ def main():
             help="Prefix for output files [default=%(default)s].")
     args = parser.parse_args()
     print("Hello, world.")
+    
+    #make config class dictionary 
+    
+    simulate.ancestral_deme_sequences()
+    
+    
 
 if __name__ == '__main__':
     main()

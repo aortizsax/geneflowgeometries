@@ -1,0 +1,7 @@
+number-of-individual-per-deme, 1000
+number-of-demes, 9
+migration-rate, 
+restriction-rate, 
+mutation-rate, 
+simulation-time, 
+LOGID, 
