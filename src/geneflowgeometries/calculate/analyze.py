@@ -58,8 +58,8 @@ def parse(filenames):
     
     return (sequence_dataframe, data_matrix)
     
-def wright_fst(sequences,metadata,deme_identifier):
-    populationgeneticstats.wright_fst(sequences,metadata,deme_identifier)
+def nei_fst(sequences,metadata,deme_identifier):
+    populationgeneticstats.nei_fst(sequences,metadata,deme_identifier)
     return
     
 def pairwise_fst():
@@ -69,6 +69,11 @@ def pairwise_fst():
     
 def weir_cockerman_fst():
     populationgeneticstats.weir_cockerman_fst(sequences,metadata,deme_identifier)
+
+    return
+
+def weir_goudet_population_specific_fst(sequences,metadata,deme_identifier):
+    populationgeneticstats.weir_goudet_population_specific_fst(sequences,metadata,deme_identifier)
 
     return
 

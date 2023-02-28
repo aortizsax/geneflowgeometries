@@ -168,7 +168,14 @@ def main():
    
     (sequence_dataframe, data_matrix) = analyze.parse(filenames)
 
-    analyze.wright_fst(sequence_dataframe, data_matrix, tag)
+    analyze.nei_fst(sequence_dataframe, data_matrix, tag)
+
+
+    analyze.weir_goudet_population_specific_fst(sequence_dataframe, data_matrix,tag)
+
+    analyze.pairwise_fst(sequence_dataframe, data_matrix,tag)
+
+    analyze.pairwise_fst(sequence_dataframe, data_matrix,tag)
 
     analyze.pairwise_fst(sequence_dataframe, data_matrix,tag)
 
