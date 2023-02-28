@@ -36,7 +36,7 @@ import sys
 import argparse
 
 from geneflowgeometries.simulate import ancestral_deme_sequences
-from geneflowgeometries import calculate
+from geneflowgeometries.calculate import analyze 
 
 def main():
     parser = argparse.ArgumentParser(description=None)
@@ -148,21 +148,30 @@ def main():
     
     #Pass args
     Geometry = args.geometry
-    number_of_chromosomes = args.number_of_chromosomes_per_deme
+    number_of_chromosomes = int(args.number_of_chromosomes_per_deme)
     number_of_ploidy = args.number_of_chromosomes_per_invdividual
     number_of_demes = args.number_of_demes
     migration_rate = args.migration_rate
     restriction_rate = args.restriction_rate
     mutation_rate = args.mutation_rate
-    sequence_length = args.sequence_length
-    simT = args.simulation_time
+    sequence_length = int(args.sequence_length)
+    simT = int(args.simulation_time)
     
     #make config class dictionary 
     print(dir(ancestral_deme_sequences))
-    ancestral_deme_sequences.ancestral_deme_sequences(Geometry, number_of_chromosomes,
+    (filenames, tag) = ancestral_deme_sequences.ancestral_deme_sequences(Geometry, number_of_chromosomes,
                              number_of_ploidy, number_of_demes, migration_rate, 
                              restriction_rate, mutation_rate, sequence_length,
                              simT)
+                             
+    print('Simulation done.')
+   
+    (sequence_dataframe, data_matrix) = analyze.parse(filenames)
+
+    analyze.wright_fst(sequence_dataframe, data_matrix, tag)
+
+    analyze.pairwise_fst(sequence_dataframe, data_matrix,tag)
+
     
     
 
