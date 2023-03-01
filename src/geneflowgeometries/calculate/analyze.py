@@ -62,8 +62,8 @@ def nei_fst(sequences,metadata,deme_identifier):
     populationgeneticstats.nei_fst(sequences,metadata,deme_identifier)
     return
     
-def pairwise_fst():
-    populationgeneticstats.pairwise_fst(sequences,metadata,deme_identifier)
+def by_deme_pairwise_fst(sequences,metadata,deme_identifier):
+    populationgeneticstats.by_deme_pairwise_fst(sequences,metadata,deme_identifier)
 
     return
     
@@ -74,6 +74,11 @@ def weir_cockerman_fst():
 
 def weir_goudet_population_specific_fst(sequences,metadata,deme_identifier):
     populationgeneticstats.weir_goudet_population_specific_fst(sequences,metadata,deme_identifier)
+
+    return
+    #
+def wright_fis(sequences,metadata,deme_identifier):
+    populationgeneticstats.wright_fis(sequences,metadata,deme_identifier)
 
     return
 

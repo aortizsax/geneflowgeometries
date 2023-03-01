@@ -40,12 +40,6 @@ from geneflowgeometries.calculate import analyze
 
 def main():
     parser = argparse.ArgumentParser(description=None)
-#    parser.add_argument(
-#            "src_paths",
-#            action="store",
-#            nargs="+",
-#            metavar="FILE",
-#            help="Path to source file(s).")
 
     parser.add_argument(
         "-S",
@@ -131,6 +125,20 @@ def main():
         default=100,
         help="Number of trials/generations to run simulation for [default=%(default)s].",
     )
+#    parser.add_argument(
+#            "src_paths",
+#            action="store",
+#            nargs="+",
+#            metavar="FILE",
+#            help="Path to source file(s).")
+#    parser.add_argument(
+#        "-snsh",
+#        "--snapshot",
+#        action="store",
+#        nargs='+',
+#        default=[1,5,10,20],
+#        help="Number of trials/generations to run simulation for [default=%(default)s].",
+#    )
     parser.add_argument(
         "-id",
         "--log-id",
@@ -144,7 +152,7 @@ def main():
             default="output",
             help="Prefix for output files [default=%(default)s].")
     args = parser.parse_args()
-    print("Hello, world.")
+    print("Hello, simulation begining")
     
     #Pass args
     Geometry = args.geometry
@@ -156,13 +164,15 @@ def main():
     mutation_rate = args.mutation_rate
     sequence_length = int(args.sequence_length)
     simT = int(args.simulation_time)
+    snapshot_times = [1,number_of_chromosomes,5*number_of_chromosomes,
+                      10*number_of_chromosomes,20*number_of_chromosomes]
     
     #make config class dictionary 
-    print(dir(ancestral_deme_sequences))
+    #print(dir(ancestral_deme_sequences))
     (filenames, tag) = ancestral_deme_sequences.ancestral_deme_sequences(Geometry, number_of_chromosomes,
                              number_of_ploidy, number_of_demes, migration_rate, 
                              restriction_rate, mutation_rate, sequence_length,
-                             simT)
+                             simT,snapshot_times)
                              
     print('Simulation done.')
    
@@ -173,11 +183,11 @@ def main():
 
     analyze.weir_goudet_population_specific_fst(sequence_dataframe, data_matrix,tag)
 
-    analyze.pairwise_fst(sequence_dataframe, data_matrix,tag)
+    analyze.by_deme_pairwise_fst(sequence_dataframe, data_matrix,tag)
 
-    analyze.pairwise_fst(sequence_dataframe, data_matrix,tag)
+    analyze.wright_fis(sequence_dataframe, data_matrix,tag)
 
-    analyze.pairwise_fst(sequence_dataframe, data_matrix,tag)
+    #analyze.pairwise_fst(sequence_dataframe, data_matrix,tag)
 
     
     
