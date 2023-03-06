@@ -31,7 +31,7 @@
 ##############################################################################
 
 import os
-import pathlib
+import pathlib  #barcharts next
 import sys
 import argparse
 
@@ -70,7 +70,7 @@ def main():
         help="Migration rate across demes [default=%(default)s].",
     )
     parser.add_argument(
-        "-K",
+        "-k",
         "--number-of-demes",
         action="store",
         default=4,
@@ -80,8 +80,8 @@ def main():
         "-m",
         "--migration-rate",
         action="store",
-        default=1,
-        help="Migration rate across demes [default=%(default)s].",
+        default=0,
+        help="Migration rate across demes. Max = 1/k, where k is number of demes [default=%(default)s].",
     )
     parser.add_argument(
         "-R",
@@ -122,23 +122,9 @@ def main():
         "-simT",
         "--simulation-time",
         action="store",
-        default=100,
+        default=2000,
         help="Number of trials/generations to run simulation for [default=%(default)s].",
     )
-#    parser.add_argument(
-#            "src_paths",
-#            action="store",
-#            nargs="+",
-#            metavar="FILE",
-#            help="Path to source file(s).")
-#    parser.add_argument(
-#        "-snsh",
-#        "--snapshot",
-#        action="store",
-#        nargs='+',
-#        default=[1,5,10,20],
-#        help="Number of trials/generations to run simulation for [default=%(default)s].",
-#    )
     parser.add_argument(
         "-id",
         "--log-id",
@@ -159,7 +145,10 @@ def main():
     number_of_chromosomes = int(args.number_of_chromosomes_per_deme)
     number_of_ploidy = args.number_of_chromosomes_per_invdividual
     number_of_demes = args.number_of_demes
-    migration_rate = args.migration_rate
+    migration_rate = float(args.migration_rate)
+    if migration_rate > 1/number_of_demes:
+        migration_rate = 1/number_of_demes
+        print("Defaulting to max migration rate of 1/k")
     restriction_rate = args.restriction_rate
     mutation_rate = args.mutation_rate
     sequence_length = int(args.sequence_length)
@@ -169,23 +158,28 @@ def main():
     
     #make config class dictionary 
     #print(dir(ancestral_deme_sequences))
-    (filenames, tag) = ancestral_deme_sequences.ancestral_deme_sequences(Geometry, number_of_chromosomes,
+    (filenames_snapshot, tag) = ancestral_deme_sequences.ancestral_deme_sequences(Geometry, number_of_chromosomes,
                              number_of_ploidy, number_of_demes, migration_rate, 
                              restriction_rate, mutation_rate, sequence_length,
                              simT,snapshot_times)
                              
-    print('Simulation done.')
-   
-    (sequence_dataframe, data_matrix) = analyze.parse(filenames)
+    #print('Simulation done.')
+    #print(filenames_snapshot)
+    
+    for i ,fastafiles in enumerate(filenames_snapshot[0]):
+        #print(filenames_snapshot[0][i],filenames_snapshot[0][i])
+        filenames = [filenames_snapshot[0][i],filenames_snapshot[1][i]]
+        print('Analysis for ', filenames)
+        (sequence_dataframe, data_matrix) = analyze.parse(filenames)
 
-    analyze.nei_fst(sequence_dataframe, data_matrix, tag)
+        analyze.nei_fst(sequence_dataframe, data_matrix, tag)
 
 
-    analyze.weir_goudet_population_specific_fst(sequence_dataframe, data_matrix,tag)
+        analyze.weir_goudet_population_specific_fst(sequence_dataframe, data_matrix,tag)
 
-    analyze.by_deme_pairwise_fst(sequence_dataframe, data_matrix,tag)
+        analyze.by_deme_pairwise_fst(sequence_dataframe, data_matrix,tag)
 
-    analyze.wright_fis(sequence_dataframe, data_matrix,tag)
+        analyze.wright_fis(sequence_dataframe, data_matrix,tag)
 
     #analyze.pairwise_fst(sequence_dataframe, data_matrix,tag)
 

@@ -71,8 +71,8 @@ def ancestral_deme_sequences(Geometry, number_of_chromosomes, number_of_ploidy,
                              mutation_rate, sequence_length, 
                              number_generations,snapshot_times):
                             
-    FASTAFILENAMES = []
-    CSVFILENAMES = []
+    FASTAFILENAMES = [] # 
+    CSVFILENAMES = [] #
     demes = [[]] * number_of_demes
     labels=[]
     for i, deme_sequences in enumerate(demes):
