@@ -4,10 +4,10 @@
 ##############################################################################
 ## Copyright (c) 2023 Adrian Ortiz-Velez.
 ## All rights reserved.
-## 
+##
 ## Redistribution and use in source and binary forms, with or without
 ## modification, are permitted provided that the following conditions are met:
-## 
+##
 ##     * Redistributions of source code must retain the above copyright
 ##       notice, this list of conditions and the following disclaimer.
 ##     * Redistributions in binary form must reproduce the above copyright
@@ -16,7 +16,7 @@
 ##     * The names of its contributors may not be used to endorse or promote
 ##       products derived from this software without specific prior written
 ##       permission.
-## 
+##
 ## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ## ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 ## WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,16 +27,17 @@
 ## LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 ## OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ## ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-## 
+##
 ##############################################################################
 
 import os
-import pathlib  #barcharts next
+import pathlib  # barcharts next
 import sys
 import argparse
 
 from geneflowgeometries.simulate import ancestral_deme_sequences
-from geneflowgeometries.calculate import analyze 
+from geneflowgeometries.calculate import analyze
+
 
 def main():
     parser = argparse.ArgumentParser(description=None)
@@ -45,14 +46,14 @@ def main():
         "-S",
         "--simulate-sequences-or-continous",
         action="store",
-        default='sequences',
+        default="sequences",
         help="Choose to simulate sequences or continous variable [default=%(default)s].",
     )
     parser.add_argument(
         "-G",
         "--geometry",
         action="store",
-        default='complete graph',
+        default="complete graph",
         help="Network/graph to simulate. Options: Complete, chain, or FILE [default=%(default)s].",
     )
     parser.add_argument(
@@ -75,7 +76,7 @@ def main():
         action="store",
         default=4,
         help="Migration rate across demes [default=%(default)s].",
-    ) 
+    )
     parser.add_argument(
         "-m",
         "--migration-rate",
@@ -133,58 +134,72 @@ def main():
         help="Filename for log files [default=%(default)s].",
     )
     parser.add_argument(
-            "-o", "--output-prefix",
-            action="store",
-            default="output",
-            help="Prefix for output files [default=%(default)s].")
+        "-o",
+        "--output-prefix",
+        action="store",
+        default="output",
+        help="Prefix for output files [default=%(default)s].",
+    )
     args = parser.parse_args()
     print("Hello, simulation begining")
-    
-    #Pass args
+
+    # Pass args
     Geometry = args.geometry
     number_of_chromosomes = int(args.number_of_chromosomes_per_deme)
     number_of_ploidy = args.number_of_chromosomes_per_invdividual
     number_of_demes = args.number_of_demes
     migration_rate = float(args.migration_rate)
-    if migration_rate > 1/number_of_demes:
-        migration_rate = 1/number_of_demes
+    if migration_rate > 1 / number_of_demes:
+        migration_rate = 1 / number_of_demes
         print("Defaulting to max migration rate of 1/k")
     restriction_rate = args.restriction_rate
     mutation_rate = args.mutation_rate
     sequence_length = int(args.sequence_length)
     simT = int(args.simulation_time)
-    snapshot_times = [1,number_of_chromosomes,5*number_of_chromosomes,
-                      10*number_of_chromosomes,20*number_of_chromosomes]
-    
-    #make config class dictionary 
-    #print(dir(ancestral_deme_sequences))
-    (filenames_snapshot, tag) = ancestral_deme_sequences.ancestral_deme_sequences(Geometry, number_of_chromosomes,
-                             number_of_ploidy, number_of_demes, migration_rate, 
-                             restriction_rate, mutation_rate, sequence_length,
-                             simT,snapshot_times)
-                             
-    #print('Simulation done.')
-    #print(filenames_snapshot)
-    
-    for i ,fastafiles in enumerate(filenames_snapshot[0]):
-        #print(filenames_snapshot[0][i],filenames_snapshot[0][i])
-        filenames = [filenames_snapshot[0][i],filenames_snapshot[1][i]]
-        print('Analysis for ', filenames)
+    snapshot_times = [
+        1,
+        number_of_chromosomes,
+        5 * number_of_chromosomes,
+        10 * number_of_chromosomes,
+        20 * number_of_chromosomes,
+    ]
+
+    # make config class dictionary
+    # print(dir(ancestral_deme_sequences))
+    (filenames_snapshot, tag) = ancestral_deme_sequences.ancestral_deme_sequences(
+        Geometry,
+        number_of_chromosomes,
+        number_of_ploidy,
+        number_of_demes,
+        migration_rate,
+        restriction_rate,
+        mutation_rate,
+        sequence_length,
+        simT,
+        snapshot_times,
+    )
+
+    # print('Simulation done.')
+    # print(filenames_snapshot)
+
+    for i, fastafiles in enumerate(filenames_snapshot[0]):
+        # print(filenames_snapshot[0][i],filenames_snapshot[0][i])
+        filenames = [filenames_snapshot[0][i], filenames_snapshot[1][i]]
+        print("Analysis for ", filenames)
         (sequence_dataframe, data_matrix) = analyze.parse(filenames)
 
         analyze.nei_fst(sequence_dataframe, data_matrix, tag)
 
+        analyze.weir_goudet_population_specific_fst(
+            sequence_dataframe, data_matrix, tag
+        )
 
-        analyze.weir_goudet_population_specific_fst(sequence_dataframe, data_matrix,tag)
+        analyze.by_deme_pairwise_fst(sequence_dataframe, data_matrix, tag)
 
-        analyze.by_deme_pairwise_fst(sequence_dataframe, data_matrix,tag)
+        analyze.wright_fis(sequence_dataframe, data_matrix, tag)
 
-        analyze.wright_fis(sequence_dataframe, data_matrix,tag)
+    # analyze.pairwise_fst(sequence_dataframe, data_matrix,tag)
 
-    #analyze.pairwise_fst(sequence_dataframe, data_matrix,tag)
 
-    
-    
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -34,70 +34,80 @@
 ###########################################################################
 ## Reader Implementation
 
-# Libraries 
+# Libraries
 # import modules front end parser
 from nyemtaay.parse.parser import read_fasta_files, read_metadata, to_dataframe
 from nyemtaay.calculate import populationgeneticstats
 from nyemtaay.mathlib import sterling
 from nyemtaay.tests.nuetrality import tajimas_d
 
-def parse(filenames):
 
+def parse(filenames):
     # use parser modules
     # pass list of fasta files to fasta parser
     fastafiles = [filenames[0]]
     sequence_matrix = read_fasta_files(fastafiles)
-    
+
     # pass metadata to its parser
     metadata = filenames[1]
-    data_matrix = read_metadata(metadata,0)
-    
+    data_matrix = read_metadata(metadata, 0)
+
     # convert matrix to dataframe with indexes matching metadata
     sequence_dataframe = to_dataframe(sequence_matrix, data_matrix)
     print("Done parsing")
-    
+
     return (sequence_dataframe, data_matrix)
-    
-def nei_fst(sequences,metadata,deme_identifier):
-    populationgeneticstats.nei_fst(sequences,metadata,deme_identifier)
+
+
+def nei_fst(sequences, metadata, deme_identifier):
+    populationgeneticstats.nei_fst(sequences, metadata, deme_identifier)
     return
-    
-def by_deme_pairwise_fst(sequences,metadata,deme_identifier):
-    populationgeneticstats.by_deme_pairwise_fst(sequences,metadata,deme_identifier)
+
+
+def by_deme_pairwise_fst(sequences, metadata, deme_identifier):
+    populationgeneticstats.by_deme_pairwise_fst(sequences, metadata, deme_identifier)
 
     return
-    
+
+
 def weir_cockerman_fst():
-    populationgeneticstats.weir_cockerman_fst(sequences,metadata,deme_identifier)
+    populationgeneticstats.weir_cockerman_fst(sequences, metadata, deme_identifier)
 
     return
 
-def weir_goudet_population_specific_fst(sequences,metadata,deme_identifier):
-    populationgeneticstats.weir_goudet_population_specific_fst(sequences,metadata,deme_identifier)
+
+def weir_goudet_population_specific_fst(sequences, metadata, deme_identifier):
+    populationgeneticstats.weir_goudet_population_specific_fst(
+        sequences, metadata, deme_identifier
+    )
 
     return
     #
-def wright_fis(sequences,metadata,deme_identifier):
-    populationgeneticstats.wright_fis(sequences,metadata,deme_identifier)
+
+
+def wright_fis(sequences, metadata, deme_identifier):
+    populationgeneticstats.wright_fis(sequences, metadata, deme_identifier)
 
     return
+
 
 def plot_ancenstal_snapshots():
-
     return
+
 
 def plot_():
-
     return
-# WRIGHT Fst 
+
+
+# WRIGHT Fst
 
 # Pairwise Fst
 
-# Weir and Cockerham Fst Population specific 
+# Weir and Cockerham Fst Population specific
 
 # anc bar graph
 
-# network x plot of calculation 
-# topo 
+# network x plot of calculation
+# topo
 # completegraph()
-# build chain int until same size 
+# build chain int until same size
