@@ -34,8 +34,10 @@ import os
 import pathlib  # barcharts next
 import sys
 import argparse
+import datetime
 
-from geneflowgeometries.simulate import ancestral_deme_sequences
+
+from geneflowgeometries.simulate import ancestral_deme_sequences , continuous_trait_evolution
 from geneflowgeometries.calculate import analyze
 
 
@@ -142,8 +144,15 @@ def main():
     )
     args = parser.parse_args()
     print("Hello, simulation begining")
+    now = datetime.datetime.now()
+
+    print(now.split(' ')[0])
+    date = now.split(' ')[0]
+    master_log_row = now.split(' ')[0]+','
 
     # Pass args
+    simulate_what = args.simulate_sequences_or_continous
+    print(simulate_what)
     Geometry = args.geometry
     number_of_chromosomes = int(args.number_of_chromosomes_per_deme)
     number_of_ploidy = args.number_of_chromosomes_per_invdividual
@@ -161,45 +170,74 @@ def main():
         number_of_chromosomes,
         5 * number_of_chromosomes,
         10 * number_of_chromosomes,
-        20 * number_of_chromosomes,
+        20 * number_of_chromosomes
     ]
+    
+    master_log_row += simulate_what + ','
+    master_log_row += Geometry + ','
+    master_log_row += number_of_chromosomes + ','
+    master_log_row += number_of_ploidy + ','
+    master_log_row += number_of_demes + ','
+    master_log_row += migration_rate + ','
+    master_log_row += mutation_rate + ','
+    master_log_row += sequence_length + ','
+    master_log_row += simT + ','
+    master_log_row += snapshot_times + ','
+    
+    
+    
+    
 
     # make config class dictionary
-    # print(dir(ancestral_deme_sequences))
-    (filenames_snapshot, tag) = ancestral_deme_sequences.ancestral_deme_sequences(
-        Geometry,
-        number_of_chromosomes,
-        number_of_ploidy,
-        number_of_demes,
-        migration_rate,
-        restriction_rate,
-        mutation_rate,
-        sequence_length,
-        simT,
-        snapshot_times,
-    )
-
-    # print('Simulation done.')
-    # print(filenames_snapshot)
-
-    for i, fastafiles in enumerate(filenames_snapshot[0]):
-        # print(filenames_snapshot[0][i],filenames_snapshot[0][i])
-        filenames = [filenames_snapshot[0][i], filenames_snapshot[1][i]]
-        print("Analysis for ", filenames)
-        (sequence_dataframe, data_matrix) = analyze.parse(filenames)
-
-        analyze.nei_fst(sequence_dataframe, data_matrix, tag)
-
-        analyze.weir_goudet_population_specific_fst(
-            sequence_dataframe, data_matrix, tag
+    if simulate_what == 'sequences':
+        
+        (filenames_snapshot, tag) = ancestral_deme_sequences.ancestral_deme_sequences(
+            Geometry,
+            number_of_chromosomes,
+            number_of_ploidy,
+            number_of_demes,
+            migration_rate,
+            restriction_rate,
+            mutation_rate,
+            sequence_length,
+            simT,
+            snapshot_times
         )
 
-        analyze.by_deme_pairwise_fst(sequence_dataframe, data_matrix, tag)
+        # print('Simulation done.')
+        # print(filenames_snapshot)
 
-        analyze.wright_fis(sequence_dataframe, data_matrix, tag)
+        for i, fastafiles in enumerate(filenames_snapshot[0]):
 
-    # analyze.pairwise_fst(sequence_dataframe, data_matrix,tag)
+            filenames = [filenames_snapshot[0][i], filenames_snapshot[1][i]]
+            print("Analysis for ", filenames)
+            
+            (sequence_dataframe, data_matrix) = analyze.parse(filenames)
 
+            analyze.nei_fst(sequence_dataframe, data_matrix, tag)
+
+            analyze.weir_goudet_population_specific_fst(
+                sequence_dataframe, 
+                data_matrix, tag
+            )
+
+            analyze.by_deme_pairwise_fst(sequence_dataframe, data_matrix, tag)
+
+            analyze.wright_fis(sequence_dataframe, data_matrix, tag)
+
+        # analyze.pairwise_fst(sequence_dataframe, data_matrix,tag)
+    else:
+        csvfile = continuous_trait_evolution.continuous_trait_evoluion(
+                                            Geometry,
+                                            number_of_chromosomes,
+                                            number_of_demes,
+                                            migration_rate,
+                                            simT
+                                            )
+                                            
+    f = open("demofile2.txt", "a")
+    f.write(master_log_row)
+    f.close()
 
 if __name__ == "__main__":
     main()

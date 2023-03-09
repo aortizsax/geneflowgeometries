@@ -57,137 +57,229 @@ class Chromosome:
     def __str__(self):
         return self.sequence + self.ancenstral_deme
 
+class Continuous_trait_deme:
+    def __init__(self, mean, std,deme):
+        self.mean = mean
+        self.std = std
+        self.deme = deme
 
+    def __str__(self):
+        return "Deme:" + self.deme+ ",Mean:"+self.mean+',Std:'+self.std
+        
+        
 alphabet_code = {"A": "0", "C": "1", "G": "2", "T": "3"}
 code_alphabet = {"0": "A", "1": "C", "2": "G", "3": "T"}
 alphabet = string.ascii_lowercase
 
 
-def ancestral_deme_sequences(
+def continuous_trait_evoluion(
     Geometry,
     number_of_chromosomes,
-    number_of_ploidy,
     number_of_demes,
     migration_rate,
-    restriction_rate,
-    mutation_rate,
-    sequence_length,
-    number_generations,
-    snapshot_times,
-):
+    number_generations
+    ):
     FASTAFILENAMES = []  # csv means
     CSVFILENAMES = []  # pop data
-    demes = [[]] * number_of_demes
+    demes = [[]]
     labels = []
-    for i, deme_sequences in enumerate(demes):
+    for i in range(number_of_demes):
         labels.append(alphabet[i])
+        demes[0].append(Continuous_trait_deme(0,1,alphabet[i]))
 
-    start_seqs = []
-    for i, deme_sequences in enumerate(demes):
-        seq = ""
-        for j in range(sequence_length):
-            seq += str(random.randint(0, 3))
-
-        start_seqs.append(seq)
-
-    for i, deme_sequences in enumerate(demes):
-        demes[i] = [0] * number_of_chromosomes
-
-        for k in range(number_of_chromosomes):
-            deme_chromosome = Chromosome(start_seqs[i], labels[i])
-
-            demes[i][k] = deme_chromosome
+    csv_list = [',generation,A,B,C,D']#add labels
+    
+    
 
     for trial in range(number_generations):
-        # print(trial)
-        temp_demes = []
-        for i, deme_sequences in enumerate(demes):
-            temp_demes.append(deme_sequences.copy())
-
-        # simulate coal foreward in time
-        for i, temp_sequences in enumerate(temp_demes):
-            temp_draws = []
+        print('trial',trial)
+        temp_demes_mean = [0] * number_of_demes
+        temp_demes_std = [0] * number_of_demes
+                # simulate draws foreward in time
+        
+        temp_draws = [0.0] * number_of_demes
+        
+        demes_mean = []
+        demes_std = []
+        print(demes[trial])
+        for i, deme_traits in enumerate(demes[trial]):
+            print('i',i)
+            demes_mean.append(deme_traits.mean)
+            demes_std.append(deme_traits.std)
+            
+        for i, deme_traits in enumerate(demes[trial]):
+        
+            
             # migration arrary
             migration_array = [migration_rate] * number_of_demes
             migration_array[i] = 1 - (migration_rate * (number_of_demes - 1))
-            for k in range(number_of_chromosomes):
-                sample_demes = range(number_of_demes)
+            print(migration_array)
+            number_draw = int(migration_array[i] * number_of_chromosomes)
+            temp_draws[i] = np.random.normal(loc=deme_traits.mean,
+                                             scale=deme_traits.std,
+                                             size=number_draw)
+            migration_array = migration_array[:i]+migration_array[i+1:] 
+            print(migration_array)
+            #if sum(migration array    
+            temp_std = demes_std[:i]+demes_std[i+1:]       
+            for j, meanj in enumerate(demes_mean[:i]+demes_mean[i+1:]):
+                print('j',j)
 
-                from_deme_draw = np.random.choice(sample_demes, p=migration_array)
+                number_draw = int(migration_array[j] * number_of_chromosomes)
+                np.append(temp_draws[i],
+                          np.random.normal(loc=meanj,
+                                           scale=temp_std[j],
+                                           size=number_draw))
+            #else pass
+            temp_demes_mean[i] = round(np.mean(temp_draws[i]),2)
+            temp_demes_std[i] = round(np.std(temp_draws[i]),2)
 
-                # equal weights             from_deme_draw = random.randint(0,number_of_demes-1)
-                from_sequence_draw = random.randint(0, number_of_chromosomes - 1)
-                temp_draws.append(demes[from_deme_draw][from_sequence_draw])
-            random.shuffle(temp_draws)
-            temp_demes[i] = temp_draws
+        demes_mean = temp_demes_mean
+        demes_std = temp_demes_std
+        demes.append([])
+        for i in range(number_of_demes): 
+            print('next trial',trial+1)
+            mean = demes_mean[i]
+            std = demes_std[i]
+            label = alphabet[i]
+            demes[trial+1].append(Continuous_trait_deme(mean,std,label))
+        
+        csv_list.append(str(trial)+','+''.join(str(demes_mean))[1:-1])
+    print(csv_list)
+    # write deme data for analysis downstream
+    # open file in write mode
+    CSVFILENAME = "./completegraph_simulation_continuous_trait_evolution.csv"
+    with open(CSVFILENAME, "w") as fp:
+        for item in csv_list:
+            # write each item on a new line
+            fp.write("%s\n" % item)
+        print("Done", trial)
 
-        # update demes/pops with temp
-        demes = temp_demes  # .copy()
+        CSVFILENAMES.append(CSVFILENAME)
 
-        # mutate function
-        for i, deme_sequences in enumerate(demes):
-            for j, chromosome in enumerate(deme_sequences):
-                for k, allele in enumerate(chromosome.sequence):
-                    if random.randint(0, int(0.75 * mutation_rate)) == 0:
-                        demes[i][j].sequence = (
-                            demes[i][j].sequence[:k]
-                            + str(random.randint(0, 3))
-                            + demes[i][j].sequence[k + 1 :]
-                        )
+    return CSVFILENAMES
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+def continuous_trait_evoluion_old(
+    Geometry,
+    number_of_chromosomes,
+    number_of_demes,
+    migration_rate,
+    number_generations
+    ):
+    FASTAFILENAMES = []  # csv means
+    CSVFILENAMES = []  # pop data
+    demes_mean = [[]] * number_of_demes
+    demes_std = [[]] * number_of_demes
+    labels = []
+    for i, mean in enumerate(demes_mean):
+        labels.append(alphabet[i])
 
-        if (trial in snapshot_times) | (trial == number_generations - 1):
-            print("snapshot", trial)
-            taxon_labels = []
-            csv_list = [",IDV,SUBPOP,ANC"]
-            fasta_list = []
-            for deme_count, deme in enumerate(demes):
-                for chromose_count, chromosome in enumerate(deme):
-                    sequence_bases = ""
+    csv_list = [',generation,A,B,C,D']#add labels
 
-                    for base in chromosome.sequence:
-                        sequence_bases += code_alphabet[str(base)]
 
-                    fasta_list.append(
-                        ">" + labels[deme_count] + ".chromsome." + str(chromose_count)
-                    )
+    ###
+    for i, mean in enumerate(demes_mean):
+        demes_mean[i] = [0] 
+        demes_std[i] = [1] 
 
-                    csv_list.append(
-                        labels[deme_count]
-                        + ".chromsome."
-                        + str(chromose_count)
-                        + ","
-                        + labels[deme_count]
-                        + "."
-                        + str(math.floor(chromose_count / 2))
-                        + ","
-                        + labels[deme_count]
-                        + ","
-                        + chromosome.ancenstral_deme
-                    )
+    
+    
 
-                    fasta_list.append(sequence_bases)
-                print()
+    for trial in range(number_generations):
+        temp_demes_mean = [0] * number_of_demes
+        temp_demes_std = [0] * number_of_demes
+                # simulate draws foreward in time
+        
+        temp_draws = [0.0] * number_of_demes
+        for i, mean in enumerate(demes_mean):
+        
+            
+            # migration arrary
+            migration_array = [migration_rate] * number_of_demes
+            migration_array[i] = 1 - (migration_rate * (number_of_demes - 1))
+            number_draw = int(migration_array[i] * number_of_chromosomes)
+            temp_draws[i] = np.random.normal(loc=mean,
+                                             scale=demes_std[i],
+                                             size=number_draw)
+            migration_array = migration_array[:i]+migration_array[i+1:]            
+            for j, meanj in enumerate(demes_mean[:i]+demes_mean[i+1:]):
 
-            # write deme data for analysis downstream
-            # open file in write mode
-            CSVFILENAME = "./completegraph_simulation_" + str(trial) + ".csv"
-            with open(CSVFILENAME, "w") as fp:
-                for item in csv_list:
-                    # write each item on a new line
-                    fp.write("%s\n" % item)
-                print("Done", trial)
+                number_draw = int(migration_array[j] * number_of_chromosomes)
+                np.append(temp_draws[i],
+                          np.random.normal(loc=mean,
+                                           scale=demes_std[i],
+                                           size=number_draw))
+        
+            temp_demes_mean[i] = round(np.mean(temp_draws[i]),2)
+            temp_demes_std[i] = round(np.std(temp_draws[i]),2)
 
-            # Write deme sequences for analyis downstream
-            # open file in write mode
-            FASTAFILENAME = "./completegraph_simulation_" + str(trial) + ".fasta"
-            with open(FASTAFILENAME, "w") as fp:
-                for item in fasta_list:
-                    # write each item on a new line
-                    fp.write("%s\n" % item)
-                print("Done", trial)
+        demes_mean = temp_demes_mean
+        demes_std = temp_demes_std
+        
+        csv_list.append(str(trial)+','+''.join(str(demes_mean))[1:-1])
+    print(csv_list)
+    # write deme data for analysis downstream
+    # open file in write mode
+    CSVFILENAME = "./completegraph_simulation_continuous_trait_evolution.csv"
+    with open(CSVFILENAME, "w") as fp:
+        for item in csv_list:
+            # write each item on a new line
+            fp.write("%s\n" % item)
+        print("Done", trial)
 
-            Resolution = csv_list[0].split(",")[2]
-            FASTAFILENAMES.append(FASTAFILENAME)
-            CSVFILENAMES.append(CSVFILENAME)
+        CSVFILENAMES.append(CSVFILENAME)
 
-    return ((FASTAFILENAMES, CSVFILENAMES), Resolution)
+    return CSVFILENAMES
