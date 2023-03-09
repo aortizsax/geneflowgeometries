@@ -144,7 +144,7 @@ def main():
     )
     args = parser.parse_args()
     print("Hello, simulation begining")
-    now = datetime.datetime.now()
+    now = str(datetime.datetime.now())
 
     print(now.split(' ')[0])
     date = now.split(' ')[0]
@@ -155,8 +155,8 @@ def main():
     print(simulate_what)
     Geometry = args.geometry
     number_of_chromosomes = int(args.number_of_chromosomes_per_deme)
-    number_of_ploidy = args.number_of_chromosomes_per_invdividual
-    number_of_demes = args.number_of_demes
+    number_of_ploidy = int(args.number_of_chromosomes_per_invdividual)
+    number_of_demes = int(args.number_of_demes)
     migration_rate = float(args.migration_rate)
     if migration_rate > 1 / number_of_demes:
         migration_rate = 1 / number_of_demes
@@ -175,14 +175,14 @@ def main():
     
     master_log_row += simulate_what + ','
     master_log_row += Geometry + ','
-    master_log_row += number_of_chromosomes + ','
-    master_log_row += number_of_ploidy + ','
-    master_log_row += number_of_demes + ','
-    master_log_row += migration_rate + ','
-    master_log_row += mutation_rate + ','
-    master_log_row += sequence_length + ','
-    master_log_row += simT + ','
-    master_log_row += snapshot_times + ','
+    master_log_row += str(number_of_chromosomes) + ','
+    master_log_row += str(number_of_ploidy) + ','
+    master_log_row += str(number_of_demes) + ','
+    master_log_row += str(migration_rate) + ','
+    master_log_row += str(mutation_rate) + ','
+    master_log_row += str(sequence_length) + ','
+    master_log_row += str(simT) + ','
+    master_log_row += str(snapshot_times) + ','
     
     
     
@@ -235,7 +235,7 @@ def main():
                                             simT
                                             )
                                             
-    f = open("demofile2.txt", "a")
+    f = open("master.log", "a")
     f.write(master_log_row)
     f.close()
 

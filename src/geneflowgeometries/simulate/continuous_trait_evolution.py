@@ -44,6 +44,7 @@ import seaborn as sns
 import math
 import pandas as pd
 import string
+import datetime
 
 import random
 
@@ -148,7 +149,12 @@ def continuous_trait_evoluion(
     print(csv_list)
     # write deme data for analysis downstream
     # open file in write mode
+    date = datetime.datetime.now()
+    date = str(date).split(" ")[0]
+    FILENAME = date+"_"+'continuous_'+Geometry+"_"+str(number_of_chromosomes)+"_"
+    FILENAME+= str(number_of_demes)+"_"+str(migration_rate)+"_"+str(number_generations)
     CSVFILENAME = "./completegraph_simulation_continuous_trait_evolution.csv"
+    CSVFILENAME = FILENAME + "_" + str(trial) + ".csv"
     with open(CSVFILENAME, "w") as fp:
         for item in csv_list:
             # write each item on a new line

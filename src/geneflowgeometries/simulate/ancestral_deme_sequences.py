@@ -44,7 +44,7 @@ import seaborn as sns
 import math
 import pandas as pd
 import string
-
+import datetime
 import random
 
 
@@ -170,7 +170,13 @@ def ancestral_deme_sequences(
 
             # write deme data for analysis downstream
             # open file in write mode
+            date = datetime.datetime.now()
+            date = str(date).split(" ")[0]
+            FILENAME = date+"_"+'sequence_'+Geometry+"_"+str(number_of_chromosomes)+"_"+str(number_of_ploidy)+"_"
+            FILENAME+= str(number_of_demes)+"_"+str(migration_rate)+"_"+str(mutation_rate)+"_"
+            FILENAME+= str(sequence_length)+"_"+str(number_generations)
             CSVFILENAME = "./completegraph_simulation_" + str(trial) + ".csv"
+            CSVFILENAME = FILENAME + "_" + str(trial) + ".csv"
             with open(CSVFILENAME, "w") as fp:
                 for item in csv_list:
                     # write each item on a new line
@@ -179,7 +185,7 @@ def ancestral_deme_sequences(
 
             # Write deme sequences for analyis downstream
             # open file in write mode
-            FASTAFILENAME = "./completegraph_simulation_" + str(trial) + ".fasta"
+            FASTAFILENAME = FILENAME + "_" + str(trial) + ".fasta"
             with open(FASTAFILENAME, "w") as fp:
                 for item in fasta_list:
                     # write each item on a new line
