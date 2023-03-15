@@ -20,7 +20,7 @@
 ## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ## ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 ## WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-## DISCLAIMED. IN NO EVENT SHALL JEET SUKUMARAN BE LIABLE FOR ANY DIRECT,
+## DISCLAIMED. IN NO EVENT SHALL ADRIAN ORTIZ-VELEZ BE LIABLE FOR ANY DIRECT,
 ## INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
 ## BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 ## DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
@@ -29,6 +29,8 @@
 ## ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##
 ##############################################################################
+
+
 
 import os
 import pathlib  # barcharts next
@@ -87,13 +89,6 @@ def main():
         help="Migration rate across demes. Max = 1/k, where k is number of demes [default=%(default)s].",
     )
     parser.add_argument(
-        "-R",
-        "--restriction-rate",
-        action="store",
-        default=0,
-        help="Restriction rate across demes [default=%(default)s].",
-    )
-    parser.add_argument(
         "-mut",
         "--mutation-rate",
         action="store",
@@ -148,7 +143,7 @@ def main():
 
     print(now.split(' ')[0])
     date = now.split(' ')[0]
-    master_log_row = now.split(' ')[0]+','
+    main_log_row = now.split(' ')[0]+','
 
     # Pass args
     simulate_what = args.simulate_sequences_or_continous
@@ -173,16 +168,16 @@ def main():
         20 * number_of_chromosomes
     ]
     
-    master_log_row += simulate_what + ','
-    master_log_row += Geometry + ','
-    master_log_row += str(number_of_chromosomes) + ','
-    master_log_row += str(number_of_ploidy) + ','
-    master_log_row += str(number_of_demes) + ','
-    master_log_row += str(migration_rate) + ','
-    master_log_row += str(mutation_rate) + ','
-    master_log_row += str(sequence_length) + ','
-    master_log_row += str(simT) + ','
-    master_log_row += str(snapshot_times) + ','
+    main_log_row += simulate_what + ','
+    main_log_row += Geometry + ','
+    main_log_row += str(number_of_chromosomes) + ','
+    main_log_row += str(number_of_ploidy) + ','
+    main_log_row += str(number_of_demes) + ','
+    main_log_row += str(migration_rate) + ','
+    main_log_row += str(mutation_rate) + ','
+    main_log_row += str(sequence_length) + ','
+    main_log_row += str(simT) + ','
+    main_log_row += str(snapshot_times) + ','
     
     
     
@@ -235,8 +230,8 @@ def main():
                                             simT
                                             )
                                             
-    f = open("master.log", "a")
-    f.write(master_log_row)
+    f = open("main.log", "a")
+    f.write(main_log_row)
     f.close()
 
 if __name__ == "__main__":
