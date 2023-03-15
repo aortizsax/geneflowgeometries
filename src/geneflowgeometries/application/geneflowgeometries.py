@@ -30,6 +30,24 @@
 ##
 ##############################################################################
 
+#get set restriction 
+
+#log handlers
+
+#OOP class methods 
+
+
+
+#runtime context 
+    #random number 
+    #loger
+    #output handler
+    #
+
+#demes_sequences class 
+#simulation a method for demes
+
+#config class
 
 
 import os
@@ -41,6 +59,11 @@ import datetime
 
 from geneflowgeometries.simulate import ancestral_deme_sequences , continuous_trait_evolution
 from geneflowgeometries.calculate import analyze
+
+class InvalidMigrationRateException(Exception):
+    "Raised when the input value is greater than 1/k, where k is the number of demes"
+    pass
+
 
 
 def main():
@@ -65,21 +88,21 @@ def main():
         "--number-of-chromosomes-per-deme",
         action="store",
         default=100,
-        help="Migration rate across demes [default=%(default)s].",
+        help="Number of chromosomes per deme [default=%(default)s].",
     )
     parser.add_argument(
         "-P",
         "--number-of-chromosomes-per-invdividual",
         action="store",
         default=2,
-        help="Migration rate across demes [default=%(default)s].",
+        help="Number of ploidy by organism [default=%(default)s].",
     )
     parser.add_argument(
         "-k",
         "--number-of-demes",
         action="store",
         default=4,
-        help="Migration rate across demes [default=%(default)s].",
+        help="Number of demes in simulation[default=%(default)s].",
     )
     parser.add_argument(
         "-m",
@@ -100,7 +123,7 @@ def main():
         "--sequence-length",
         action="store",
         default=1000,
-        help="Mutation rate for gene simulaiton [default=%(default)s].",
+        help="Sequence length for gene simulaiton [default=%(default)s].",
     )
     parser.add_argument(
         "-mean",
@@ -121,7 +144,14 @@ def main():
         "--simulation-time",
         action="store",
         default=2000,
-        help="Number of trials/generations to run simulation for [default=%(default)s].",
+        help="Number of generations to run simulation for [default=%(default)s].",
+    )
+    parser.add_argument(
+        "-simK",
+        "--number-of-simulations",
+        action="store",
+        default=200,
+        help="Number of trials of simulations to run [default=%(default)s].",
     )
     parser.add_argument(
         "-id",
@@ -137,6 +167,8 @@ def main():
         default="output",
         help="Prefix for output files [default=%(default)s].",
     )
+    
+    
     args = parser.parse_args()
     print("Hello, simulation begining")
     now = str(datetime.datetime.now())
@@ -147,17 +179,23 @@ def main():
 
     # Pass args
     simulate_what = args.simulate_sequences_or_continous
-    print(simulate_what)
+    print('Simulating',simulate_what)
     Geometry = args.geometry
     number_of_chromosomes = int(args.number_of_chromosomes_per_deme)
     number_of_ploidy = int(args.number_of_chromosomes_per_invdividual)
     number_of_demes = int(args.number_of_demes)
     migration_rate = float(args.migration_rate)
-    if migration_rate > 1 / number_of_demes:
-        migration_rate = 1 / number_of_demes
-        print("Defaulting to max migration rate of 1/k")
-    restriction_rate = args.restriction_rate
-    mutation_rate = args.mutation_rate
+    
+    try: 
+        if migration_rate > 1 / number_of_demes:
+            raise InvalidMigrationRateException 
+        else:
+            print("Valid migration rate")          
+    except InvalidMigrationRateException:
+        print("Exception occurred: Invalid migration rate")
+        raise SystemExit(1)
+        
+    mutation_rate = float(args.mutation_rate)
     sequence_length = int(args.sequence_length)
     simT = int(args.simulation_time)
     snapshot_times = [
@@ -192,7 +230,6 @@ def main():
             number_of_ploidy,
             number_of_demes,
             migration_rate,
-            restriction_rate,
             mutation_rate,
             sequence_length,
             simT,

@@ -1,10 +1,10 @@
-GeneFlowGeometries 
+GeneFlowGeometries is a ...
 
 
 ## Requirements and Installation
 =============================
 
-GeneFlowGeometries runs under Python 3 ( > 3.7, <=3.10)
+GeneFlowGeometries runs under Python 3 (>3.8)
 
 You can install GeneFlowGeometries by running::
 
@@ -17,7 +17,12 @@ $ cd geneflowgeometries
 ```
 
 ```bash
-$ conda create geneflowgeometries
+$ conda create -n geneflowgeometries python=3.9
+```
+
+
+```bash
+$ conda activate geneflowgeometries
 ```
 
 ```bash
