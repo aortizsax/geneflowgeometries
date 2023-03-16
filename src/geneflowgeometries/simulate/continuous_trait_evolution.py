@@ -64,16 +64,18 @@ class Continuous_trait_deme:
 alphabet = string.ascii_lowercase
 
 
-def continuous_trait_evoluion(
-    Geometry,
-    number_of_chromosomes,
-    number_of_demes,
-    migration_rate,
-    number_generations,
-    start_mean,
-    start_std,
-    seed,
-):
+def continuous_trait_evoluion(config_dict):
+   
+    Geometry = config_dict['simulator']['geometry']
+    number_of_chromosomes = config_dict['simulator']['number_of_chromosomes_per_deme']
+    number_of_demes = config_dict['simulator']['number_of_demes']
+    migration_rate = config_dict['simulator']['migration_rate']
+    number_generations = config_dict['simulator']['simulation_time']
+    start_mean = config_dict['simulator']['mean']
+    start_std = config_dict['simulator']['standard_deviation']
+    seed = config_dict['simulator']['seed']
+    
+    
     FASTAFILENAMES = []  # csv means, std
     CSVFILENAMES = []  # pop data
     demes = [[]]
@@ -135,7 +137,6 @@ def continuous_trait_evoluion(
 
         demes.append([])
         for i in range(number_of_demes):
-            print("next generation", generation + 1)
             mean = demes_mean[i]
             std = demes_std[i]
             label = alphabet[i]

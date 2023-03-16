@@ -216,6 +216,9 @@ def main():
     print(config_dict)
     print(config_dict.keys())
 
+
+
+
     # Pass args
     simulate_what = config_dict['simulator']['simulate_sequences_or_continous']
     print("Simulating", simulate_what)
@@ -274,20 +277,7 @@ def main():
     # make config class dictionary
     if simulate_what == "sequences":
         (filenames_snapshot, tag) = ancestral_deme_sequences.ancestral_deme_sequences(
-            Geometry,
-            number_of_chromosomes,
-            number_of_ploidy,
-            number_of_demes,
-            migration_rate,
-            mutation_rate,
-            sequence_length,
-            simT,
-            snapshot_times,
-            seed,
-        )
-
-        # print('Simulation done.')
-        # print(filenames_snapshot)
+            config_dict)
 
         for i, fastafiles in enumerate(filenames_snapshot[0]):
             filenames = [filenames_snapshot[0][i], filenames_snapshot[1][i]]
@@ -305,19 +295,10 @@ def main():
 
             analyze.wright_fis(sequence_dataframe, data_matrix, tag)
 
-        # analyze.pairwise_fst(sequence_dataframe, data_matrix,tag)
+            # analyze.pairwise_fst(sequence_dataframe, data_matrix,tag)
     else:
         print(seed)
-        csvfile = continuous_trait_evolution.continuous_trait_evoluion(
-            Geometry,
-            number_of_chromosomes,
-            number_of_demes,
-            migration_rate,
-            simT,
-            start_mean,
-            start_std,
-            seed,
-        )
+        csvfile = continuous_trait_evolution.continuous_trait_evoluion(config_dict)
 
     f = open("main.log", "a")
     f.write(main_log_row)

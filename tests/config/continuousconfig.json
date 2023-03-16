@@ -1,6 +1,6 @@
 {
     "simulator":{
-        "simulate_sequences_or_continous":"sequences",
+        "simulate_sequences_or_continous":"continuous",
         "geometry":"complete graph",
         "number_of_chromosomes_per_deme":100,
         "number_of_chromosomes_per_invdividual":2,

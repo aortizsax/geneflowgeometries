@@ -65,18 +65,26 @@ nuc_alphabet = ["A", "T", "C", "G"]
 alphabet = string.ascii_lowercase
 
 
-def ancestral_deme_sequences(
-    Geometry,
-    number_of_chromosomes,
-    number_of_ploidy,
-    number_of_demes,
-    migration_rate,
-    mutation_rate,
-    sequence_length,
-    number_generations,
-    snapshot_times,
-    seed,
-):
+def ancestral_deme_sequences(config_dict):
+
+    
+    Geometry = config_dict['simulator']['geometry']
+    number_of_chromosomes = config_dict['simulator']['number_of_chromosomes_per_deme']
+    number_of_ploidy = config_dict['simulator']['number_of_chromosomes_per_invdividual']
+    number_of_demes = config_dict['simulator']['number_of_demes']
+    migration_rate = config_dict['simulator']['migration_rate']
+    mutation_rate = config_dict['simulator']['mutation_rate']
+    sequence_length = config_dict['simulator']['sequence_length']
+    number_generations = config_dict['simulator']['simulation_time']
+    snapshot_times = [
+        1,
+        number_of_chromosomes,
+        5 * number_of_chromosomes,
+        10 * number_of_chromosomes,
+        20 * number_of_chromosomes,
+    ]
+    seed = config_dict['simulator']['seed']
+    
     FASTAFILENAMES = []
     CSVFILENAMES = []
     demes = [[]] * number_of_demes
