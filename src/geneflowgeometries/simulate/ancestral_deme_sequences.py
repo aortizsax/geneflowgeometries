@@ -60,8 +60,6 @@ class Chromosome:
         return self.sequence + self.ancenstral_deme
 
 
-alphabet_code = {"A": "0", "C": "1", "G": "2", "T": "3"}
-code_alphabet = {"0": "A", "1": "C", "2": "G", "3": "T"}
 nuc_alphabet = ['A','T','C','G']
 
 alphabet = string.ascii_lowercase
@@ -77,11 +75,19 @@ def ancestral_deme_sequences(
     sequence_length,
     number_generations,
     snapshot_times,
+    seed,
 ):
+
+
     FASTAFILENAMES = []
     CSVFILENAMES = []
     demes = [[]] * number_of_demes
     labels = []
+    
+    #set seed
+    random.seed(seed)
+    np.random.seed(seed)
+
     for i, deme_sequences in enumerate(demes):
         labels.append(alphabet[i])
 
@@ -112,6 +118,8 @@ def ancestral_deme_sequences(
         print(migration_matrix)
         migration_matrix[i][i] = 1 - (migration_rate * (number_of_demes - 1))
 
+
+    #EXPERIMENT
     for generation in range(number_generations):
         temp_demes = []
         
@@ -124,7 +132,7 @@ def ancestral_deme_sequences(
                 sample_demes = range(number_of_demes)
 
                 from_deme_draw = np.random.choice(sample_demes, p=migration_array)
-                # equal weights
+                
                 from_sequence_draw = random.randint(0, number_of_chromosomes - 1)
                 temp_draws.append(demes[from_deme_draw][from_sequence_draw])
             random.shuffle(temp_draws)
@@ -135,9 +143,7 @@ def ancestral_deme_sequences(
 
         # mutate function
         for i, deme_sequences in enumerate(demes):
-            for j, chromosome in enumerate(deme_sequences):
-                #for k, allele in enumerate(chromosome.sequence):
-                    #set possible mutations from nuc_alphabet 
+            for j, chromosome in enumerate(deme_sequences): 
                 which_sites_mut = np.random.uniform(0,1,sequence_length)
                 which_sites_mut = which_sites_mut < mutation_rate
                 which_sites_mut = np.where(which_sites_mut)[0]
@@ -188,11 +194,14 @@ def ancestral_deme_sequences(
             # open file in write mode
             date = datetime.datetime.now()
             date = str(date).split(" ")[0]
+            
             FILENAME = date+"_"+'sequence_'+Geometry+"_"+str(number_of_chromosomes)+"_"+str(number_of_ploidy)+"_"
             FILENAME+= str(number_of_demes)+"_"+str(migration_rate)+"_"+str(mutation_rate)+"_"
             FILENAME+= str(sequence_length)+"_"+str(number_generations)
+            
             CSVFILENAME = "./completegraph_simulation_" + str(generation) + ".csv"
             CSVFILENAME = FILENAME + "_" + str(generation) + ".csv"
+            
             with open(CSVFILENAME, "w") as fp:
                 for item in csv_list:
                     # write each item on a new line

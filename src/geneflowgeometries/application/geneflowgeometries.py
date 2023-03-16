@@ -30,24 +30,28 @@
 ##
 ##############################################################################
 
+#arun code comments and readme
+#kelley gihub
+
 #get set restriction 
 
-#log handlers
+#json config file********
+
 
 #OOP class methods 
+#pass config and output writers******
 
-
+#log handlers*
 
 #runtime context 
-    #random number 
     #loger
     #output handler
     #
 
 #demes_sequences class 
 #simulation a method for demes
-
-#config class
+#or 
+#simulation a class that is used as inhertiance and acts on demes seq 
 
 
 import os
@@ -55,6 +59,7 @@ import pathlib  # barcharts next
 import sys
 import argparse
 import datetime
+import random
 
 
 from geneflowgeometries.simulate import ancestral_deme_sequences , continuous_trait_evolution
@@ -129,7 +134,7 @@ def main():
         "-mean",
         "--mean",
         action="store",
-        default=1,
+        default=0,
         help="Starting mean for simulating continous varible[default=%(default)s].",
     )
     parser.add_argument(
@@ -167,6 +172,14 @@ def main():
         default="output",
         help="Prefix for output files [default=%(default)s].",
     )
+    parser.add_argument(
+        "-s",
+        "--seed",
+        action="store",
+        default="random",
+        help="Seed for reproducibilty [default=%(default)s].",
+    )
+    
     
     
     args = parser.parse_args()
@@ -198,6 +211,8 @@ def main():
     mutation_rate = float(args.mutation_rate)
     sequence_length = int(args.sequence_length)
     simT = int(args.simulation_time)
+    start_mean = args.mean
+    start_std = args.standard_deviation
     snapshot_times = [
         1,
         number_of_chromosomes,
@@ -205,6 +220,11 @@ def main():
         10 * number_of_chromosomes,
         20 * number_of_chromosomes
     ]
+    #random number
+    if args.seed == 'random':
+        seed = random.random()
+    else:
+        seed = int(args.seed)
     
     main_log_row += simulate_what + ','
     main_log_row += Geometry + ','
@@ -233,7 +253,8 @@ def main():
             mutation_rate,
             sequence_length,
             simT,
-            snapshot_times
+            snapshot_times,
+            seed
         )
 
         # print('Simulation done.')
@@ -264,7 +285,9 @@ def main():
                                             number_of_chromosomes,
                                             number_of_demes,
                                             migration_rate,
-                                            simT
+                                            simT,
+                                            start_mean,
+                                            start_std,
                                             )
                                             
     f = open("main.log", "a")

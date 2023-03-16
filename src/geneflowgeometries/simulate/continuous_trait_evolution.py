@@ -69,8 +69,6 @@ class Continuous_trait_deme:
         return "Deme:" + self.deme+ ",Mean:"+self.mean+',Std:'+self.std
         
         
-alphabet_code = {"A": "0", "C": "1", "G": "2", "T": "3"}
-code_alphabet = {"0": "A", "1": "C", "2": "G", "3": "T"}
 alphabet = string.ascii_lowercase
 
 
@@ -79,20 +77,23 @@ def continuous_trait_evoluion(
     number_of_chromosomes,
     number_of_demes,
     migration_rate,
-    number_generations
+    number_generations,
+    start_mean,
+    start_std,
     ):
-    FASTAFILENAMES = []  # csv means
+    
+    FASTAFILENAMES = []  # csv means, std
     CSVFILENAMES = []  # pop data
     demes = [[]]
     labels = []
     for i in range(number_of_demes):
         labels.append(alphabet[i])
-        demes[0].append(Continuous_trait_deme(0,1,alphabet[i]))
+        demes[0].append(Continuous_trait_deme(start_mean,start_std,alphabet[i]))
 
     csv_list = [',generation,A,B,C,D']#add labels
     
     
-
+    #EXPERIMENT
     for trial in range(number_generations):
         print('trial',trial)
         temp_demes_mean = [0] * number_of_demes
@@ -148,6 +149,8 @@ def continuous_trait_evoluion(
         
         csv_list.append(str(trial)+','+''.join(str(demes_mean))[1:-1])
     print(csv_list)
+    
+    
     # write deme data for analysis downstream
     # open file in write mode
     date = datetime.datetime.now()
