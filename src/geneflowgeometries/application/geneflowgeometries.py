@@ -30,28 +30,28 @@
 ##
 ##############################################################################
 
-#arun code comments and readme
-#kelley gihub
+# arun code comments and readme
+# kelley gihub
 
-#get set restriction 
+# get set restriction
 
-#json config file********
+# json config file********
 
 
-#OOP class methods 
-#pass config and output writers******
+# OOP class methods
+# pass config and output writers******
 
-#log handlers*
+# log handlers*
 
-#runtime context 
-    #loger
-    #output handler
-    #
+# runtime context
+# loger
+# output handler
+#
 
-#demes_sequences class 
-#simulation a method for demes
-#or 
-#simulation a class that is used as inhertiance and acts on demes seq 
+# demes_sequences class
+# simulation a method for demes
+# or
+# simulation a class that is used as inhertiance and acts on demes seq
 
 
 import os
@@ -62,13 +62,16 @@ import datetime
 import random
 
 
-from geneflowgeometries.simulate import ancestral_deme_sequences , continuous_trait_evolution
+from geneflowgeometries.simulate import (
+    ancestral_deme_sequences,
+    continuous_trait_evolution,
+)
 from geneflowgeometries.calculate import analyze
+
 
 class InvalidMigrationRateException(Exception):
     "Raised when the input value is greater than 1/k, where k is the number of demes"
     pass
-
 
 
 def main():
@@ -179,71 +182,97 @@ def main():
         default="random",
         help="Seed for reproducibilty [default=%(default)s].",
     )
-    
-    
-    
+    parser.add_argument(
+        "-cf",
+        "--config",
+        action="store",
+        default="FILE",
+        help="Config file [default=%(default)s].",
+    )
+
+
+###########################LOGGER
     args = parser.parse_args()
     print("Hello, simulation begining")
     now = str(datetime.datetime.now())
 
-    print(now.split(' ')[0])
-    date = now.split(' ')[0]
-    main_log_row = now.split(' ')[0]+','
+    print(now.split(" ")[0])
+    date = now.split(" ")[0]
+    main_log_row = now.split(" ")[0] + ","
+###############################
+
+
+
+#**********************************CONFIG
+
+    import json
+    #Load the configuration file 
+    with open(args.config) as f:
+        config = f.read()
+    
+
+
+    config_dict = json.loads(config)
+    print(config_dict)
+    print(config_dict.keys())
 
     # Pass args
-    simulate_what = args.simulate_sequences_or_continous
-    print('Simulating',simulate_what)
+    simulate_what = config_dict['simulator']['simulate_sequences_or_continous']
+    print("Simulating", simulate_what)
     Geometry = args.geometry
     number_of_chromosomes = int(args.number_of_chromosomes_per_deme)
     number_of_ploidy = int(args.number_of_chromosomes_per_invdividual)
     number_of_demes = int(args.number_of_demes)
     migration_rate = float(args.migration_rate)
-    
-    try: 
+
+    try:
         if migration_rate > 1 / number_of_demes:
-            raise InvalidMigrationRateException 
+            raise InvalidMigrationRateException
         else:
-            print("Valid migration rate")          
+            print("Valid migration rate")
     except InvalidMigrationRateException:
         print("Exception occurred: Invalid migration rate")
         raise SystemExit(1)
-        
+
     mutation_rate = float(args.mutation_rate)
     sequence_length = int(args.sequence_length)
     simT = int(args.simulation_time)
-    start_mean = args.mean
-    start_std = args.standard_deviation
+    start_mean = float(args.mean)
+    start_std = float(args.standard_deviation)
     snapshot_times = [
         1,
         number_of_chromosomes,
         5 * number_of_chromosomes,
         10 * number_of_chromosomes,
-        20 * number_of_chromosomes
+        20 * number_of_chromosomes,
     ]
-    #random number
-    if args.seed == 'random':
-        seed = random.random()
+    # random number
+    if args.seed == "random":
+        seed_range = 2**32 - 1
+        seed = int(random.uniform(0, seed_range))
     else:
         seed = int(args.seed)
-    
-    main_log_row += simulate_what + ','
-    main_log_row += Geometry + ','
-    main_log_row += str(number_of_chromosomes) + ','
-    main_log_row += str(number_of_ploidy) + ','
-    main_log_row += str(number_of_demes) + ','
-    main_log_row += str(migration_rate) + ','
-    main_log_row += str(mutation_rate) + ','
-    main_log_row += str(sequence_length) + ','
-    main_log_row += str(simT) + ','
-    main_log_row += str(snapshot_times) + ','
-    
-    
-    
-    
+#*********************************   
+        
+        
+        
+#############################
+    main_log_row += simulate_what + ","
+    main_log_row += Geometry + ","
+    main_log_row += str(number_of_chromosomes) + ","
+    main_log_row += str(number_of_ploidy) + ","
+    main_log_row += str(number_of_demes) + ","
+    main_log_row += str(migration_rate) + ","
+    main_log_row += str(mutation_rate) + ","
+    main_log_row += str(sequence_length) + ","
+    main_log_row += str(simT) + ","
+    main_log_row += str(snapshot_times) + ","
+######################
+
+
 
     # make config class dictionary
-    if simulate_what == 'sequences':
-        
+    if simulate_what == "sequences":
         (filenames_snapshot, tag) = ancestral_deme_sequences.ancestral_deme_sequences(
             Geometry,
             number_of_chromosomes,
@@ -254,24 +283,22 @@ def main():
             sequence_length,
             simT,
             snapshot_times,
-            seed
+            seed,
         )
 
         # print('Simulation done.')
         # print(filenames_snapshot)
 
         for i, fastafiles in enumerate(filenames_snapshot[0]):
-
             filenames = [filenames_snapshot[0][i], filenames_snapshot[1][i]]
             print("Analysis for ", filenames)
-            
+
             (sequence_dataframe, data_matrix) = analyze.parse(filenames)
 
             analyze.nei_fst(sequence_dataframe, data_matrix, tag)
 
             analyze.weir_goudet_population_specific_fst(
-                sequence_dataframe, 
-                data_matrix, tag
+                sequence_dataframe, data_matrix, tag
             )
 
             analyze.by_deme_pairwise_fst(sequence_dataframe, data_matrix, tag)
@@ -280,19 +307,22 @@ def main():
 
         # analyze.pairwise_fst(sequence_dataframe, data_matrix,tag)
     else:
+        print(seed)
         csvfile = continuous_trait_evolution.continuous_trait_evoluion(
-                                            Geometry,
-                                            number_of_chromosomes,
-                                            number_of_demes,
-                                            migration_rate,
-                                            simT,
-                                            start_mean,
-                                            start_std,
-                                            )
-                                            
+            Geometry,
+            number_of_chromosomes,
+            number_of_demes,
+            migration_rate,
+            simT,
+            start_mean,
+            start_std,
+            seed,
+        )
+
     f = open("main.log", "a")
     f.write(main_log_row)
     f.close()
+
 
 if __name__ == "__main__":
     main()

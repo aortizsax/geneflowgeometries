@@ -60,7 +60,7 @@ class Chromosome:
         return self.sequence + self.ancenstral_deme
 
 
-nuc_alphabet = ['A','T','C','G']
+nuc_alphabet = ["A", "T", "C", "G"]
 
 alphabet = string.ascii_lowercase
 
@@ -77,21 +77,19 @@ def ancestral_deme_sequences(
     snapshot_times,
     seed,
 ):
-
-
     FASTAFILENAMES = []
     CSVFILENAMES = []
     demes = [[]] * number_of_demes
     labels = []
-    
-    #set seed
+
+    # set seed
     random.seed(seed)
     np.random.seed(seed)
 
     for i, deme_sequences in enumerate(demes):
         labels.append(alphabet[i])
 
-    #set orginating deme sequences
+    # set orginating deme sequences
     start_seqs = []
     for i, deme_sequences in enumerate(demes):
         seq = ""
@@ -100,7 +98,7 @@ def ancestral_deme_sequences(
 
         start_seqs.append(seq)
 
-    #intalize class 
+    # intalize class
     for i, deme_sequences in enumerate(demes):
         demes[i] = [0] * number_of_chromosomes
 
@@ -108,22 +106,19 @@ def ancestral_deme_sequences(
             deme_chromosome = Chromosome(start_seqs[i], labels[i])
             demes[i][k] = deme_chromosome
 
-
-    #migration matrix
-    migration_matrix = [0]*number_of_demes
+    # migration matrix
+    migration_matrix = [0] * number_of_demes
     for i in range(number_of_demes):
-        migration_matrix[i] = [migration_rate]*number_of_demes
-    
+        migration_matrix[i] = [migration_rate] * number_of_demes
+
     for i in range(number_of_demes):
         print(migration_matrix)
         migration_matrix[i][i] = 1 - (migration_rate * (number_of_demes - 1))
 
-
-    #EXPERIMENT
+    # EXPERIMENT
     for generation in range(number_generations):
         temp_demes = []
-        
-        
+
         for i, temp_sequences in enumerate(demes):
             temp_draws = []
             # migration arrary
@@ -132,33 +127,33 @@ def ancestral_deme_sequences(
                 sample_demes = range(number_of_demes)
 
                 from_deme_draw = np.random.choice(sample_demes, p=migration_array)
-                
+
                 from_sequence_draw = random.randint(0, number_of_chromosomes - 1)
                 temp_draws.append(demes[from_deme_draw][from_sequence_draw])
             random.shuffle(temp_draws)
             temp_demes.append(temp_draws)
 
         # update demes/pops with temp
-        demes = temp_demes 
+        demes = temp_demes
 
         # mutate function
         for i, deme_sequences in enumerate(demes):
-            for j, chromosome in enumerate(deme_sequences): 
-                which_sites_mut = np.random.uniform(0,1,sequence_length)
+            for j, chromosome in enumerate(deme_sequences):
+                which_sites_mut = np.random.uniform(0, 1, sequence_length)
                 which_sites_mut = which_sites_mut < mutation_rate
                 which_sites_mut = np.where(which_sites_mut)[0]
                 if any(which_sites_mut):
                     for l, mutate_allele in enumerate(which_sites_mut):
                         allele = chromosome.sequence[mutate_allele]
                         possible_mutations = copy.deepcopy(nuc_alphabet)
-                        possible_mutations.remove(allele) 
+                        possible_mutations.remove(allele)
                         demes[i][j].sequence = (
                             demes[i][j].sequence[:mutate_allele]
                             + random.choice(possible_mutations)
                             + demes[i][j].sequence[mutate_allele + 1 :]
-                            )       
-                            
-                                
+                        )
+
+        # change to runtime*****************************
 
         if (generation in snapshot_times) | (generation == number_generations - 1):
             print("snapshot", generation)
@@ -194,14 +189,31 @@ def ancestral_deme_sequences(
             # open file in write mode
             date = datetime.datetime.now()
             date = str(date).split(" ")[0]
-            
-            FILENAME = date+"_"+'sequence_'+Geometry+"_"+str(number_of_chromosomes)+"_"+str(number_of_ploidy)+"_"
-            FILENAME+= str(number_of_demes)+"_"+str(migration_rate)+"_"+str(mutation_rate)+"_"
-            FILENAME+= str(sequence_length)+"_"+str(number_generations)
-            
+
+            FILENAME = (
+                date
+                + "_"
+                + "sequence_"
+                + Geometry
+                + "_"
+                + str(number_of_chromosomes)
+                + "_"
+                + str(number_of_ploidy)
+                + "_"
+            )
+            FILENAME += (
+                str(number_of_demes)
+                + "_"
+                + str(migration_rate)
+                + "_"
+                + str(mutation_rate)
+                + "_"
+            )
+            FILENAME += str(sequence_length) + "_" + str(number_generations)
+
             CSVFILENAME = "./completegraph_simulation_" + str(generation) + ".csv"
             CSVFILENAME = FILENAME + "_" + str(generation) + ".csv"
-            
+
             with open(CSVFILENAME, "w") as fp:
                 for item in csv_list:
                     # write each item on a new line
@@ -222,5 +234,3 @@ def ancestral_deme_sequences(
             CSVFILENAMES.append(CSVFILENAME)
 
     return ((FASTAFILENAMES, CSVFILENAMES), Resolution)
-
-
