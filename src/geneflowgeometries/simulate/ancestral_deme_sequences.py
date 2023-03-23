@@ -47,6 +47,11 @@ import pandas as pd
 import string
 import datetime
 import random
+import copy
+import logging
+
+
+from geneflowgeometries.run_time.write_and_log import write_log_sequences
 
 
 # Classes
@@ -59,243 +64,119 @@ class Chromosome:
         return self.sequence + self.ancenstral_deme
 
 
-alphabet_code = {"A": "0", "C": "1", "G": "2", "T": "3"}
-code_alphabet = {"0": "A", "1": "C", "2": "G", "3": "T"}
+nuc_alphabet = ["A", "T", "C", "G"]
+
 alphabet = string.ascii_lowercase
 
 
-def ancestral_deme_sequences(
-    Geometry,
-    number_of_chromosomes,
-    number_of_ploidy,
-    number_of_demes,
-    migration_rate,
-    restriction_rate,
-    mutation_rate,
-    sequence_length,
-    number_generations,
-    snapshot_times,
-):
+def ancestral_deme_sequences(config_dict, outfile_prefix):
+    # pass to local variables
+    Geometry = config_dict["simulator"]["geometry"]
+    number_of_chromosomes = config_dict["simulator"]["number_of_chromosomes_per_deme"]
+    number_of_ploidy = config_dict["simulator"]["number_of_chromosomes_per_invdividual"]
+    number_of_demes = config_dict["simulator"]["number_of_demes"]
+    migration_rate = config_dict["simulator"]["migration_rate"]
+    mutation_rate = config_dict["simulator"]["mutation_rate"]
+    sequence_length = config_dict["simulator"]["sequence_length"]
+    number_generations = config_dict["simulator"]["simulation_time"]
+    snapshot_times = [
+        1,
+        number_of_chromosomes,
+        5 * number_of_chromosomes,
+        10 * number_of_chromosomes,
+        20 * number_of_chromosomes,
+    ]
+    seed = config_dict["simulator"]["seed"]
+    
+    logger = logging.getLogger("geneflowgeometries.main.log")
+
+    logging.info("Simulating")
+
     FASTAFILENAMES = []
     CSVFILENAMES = []
     demes = [[]] * number_of_demes
     labels = []
+
+    # set seed
+    random.seed(seed)
+    np.random.seed(seed)
+
     for i, deme_sequences in enumerate(demes):
         labels.append(alphabet[i])
 
+    # set orginating deme sequences
     start_seqs = []
     for i, deme_sequences in enumerate(demes):
         seq = ""
         for j in range(sequence_length):
-            seq += str(random.randint(0, 3))
+            seq += random.choice(nuc_alphabet)
 
         start_seqs.append(seq)
 
+    # intalize class
     for i, deme_sequences in enumerate(demes):
         demes[i] = [0] * number_of_chromosomes
 
         for k in range(number_of_chromosomes):
             deme_chromosome = Chromosome(start_seqs[i], labels[i])
-
             demes[i][k] = deme_chromosome
 
-    for trial in range(number_generations):
-        # print(trial)
-        temp_demes = []
-        for i, deme_sequences in enumerate(demes):
-            temp_demes.append(deme_sequences.copy())
+    # migration matrix
+    migration_matrix = [0] * number_of_demes
+    for i in range(number_of_demes):
+        migration_matrix[i] = [migration_rate] * number_of_demes
 
-        # simulate coal foreward in time
-        for i, temp_sequences in enumerate(temp_demes):
+    for i in range(number_of_demes):
+        print(migration_matrix)
+        migration_matrix[i][i] = 1 - (migration_rate * (number_of_demes - 1))
+
+    # EXPERIMENT
+    for generation in range(number_generations):
+        temp_demes = []
+
+        for i, temp_sequences in enumerate(demes):
             temp_draws = []
             # migration arrary
-            migration_array = [migration_rate] * number_of_demes
-            migration_array[i] = 1 - (migration_rate * (number_of_demes - 1))
+            migration_array = migration_matrix[i]
             for k in range(number_of_chromosomes):
                 sample_demes = range(number_of_demes)
 
                 from_deme_draw = np.random.choice(sample_demes, p=migration_array)
 
-                # equal weights             from_deme_draw = random.randint(0,number_of_demes-1)
                 from_sequence_draw = random.randint(0, number_of_chromosomes - 1)
                 temp_draws.append(demes[from_deme_draw][from_sequence_draw])
             random.shuffle(temp_draws)
-            temp_demes[i] = temp_draws
+            temp_demes.append(temp_draws)
 
         # update demes/pops with temp
-        demes = temp_demes  # .copy()
+        demes = temp_demes
 
         # mutate function
         for i, deme_sequences in enumerate(demes):
             for j, chromosome in enumerate(deme_sequences):
-                for k, allele in enumerate(chromosome.sequence):
-                    if random.randint(0, int(0.75 * mutation_rate)) == 0:
+                which_sites_mut = np.random.uniform(0, 1, sequence_length)
+                which_sites_mut = which_sites_mut < mutation_rate
+                which_sites_mut = np.where(which_sites_mut)[0]
+                if any(which_sites_mut):
+                    for l, mutate_allele in enumerate(
+                        which_sites_mut
+                    ):  # add find = j; [:j]+[j:]
+                        allele = chromosome.sequence[mutate_allele]
+                        possible_mutations = copy.deepcopy(nuc_alphabet)
+                        possible_mutations.remove(allele)
                         demes[i][j].sequence = (
-                            demes[i][j].sequence[:k]
-                            + str(random.randint(0, 3))
-                            + demes[i][j].sequence[k + 1 :]
+                            demes[i][j].sequence[:mutate_allele]
+                            + random.choice(possible_mutations)
+                            + demes[i][j].sequence[mutate_allele + 1 :]
                         )
 
-        if (trial in snapshot_times) | (trial == number_generations - 1):
-            print("snapshot", trial)
-            taxon_labels = []
-            csv_list = [",IDV,SUBPOP,ANC"]
-            fasta_list = []
-            for deme_count, deme in enumerate(demes):
-                for chromose_count, chromosome in enumerate(deme):
-                    sequence_bases = ""
+        # change to runtime*****************************
 
-                    for base in chromosome.sequence:
-                        sequence_bases += code_alphabet[str(base)]
-
-                    fasta_list.append(
-                        ">" + labels[deme_count] + ".chromsome." + str(chromose_count)
-                    )
-
-                    csv_list.append(
-                        labels[deme_count]
-                        + ".chromsome."
-                        + str(chromose_count)
-                        + ","
-                        + labels[deme_count]
-                        + "."
-                        + str(math.floor(chromose_count / 2))
-                        + ","
-                        + labels[deme_count]
-                        + ","
-                        + chromosome.ancenstral_deme
-                    )
-
-                    fasta_list.append(sequence_bases)
-                print()
-
-            # write deme data for analysis downstream
-            # open file in write mode
-            date = datetime.datetime.now()
-            date = str(date).split(" ")[0]
-            FILENAME = date+"_"+'sequence_'+Geometry+"_"+str(number_of_chromosomes)+"_"+str(number_of_ploidy)+"_"
-            FILENAME+= str(number_of_demes)+"_"+str(migration_rate)+"_"+str(mutation_rate)+"_"
-            FILENAME+= str(sequence_length)+"_"+str(number_generations)
-            CSVFILENAME = "./completegraph_simulation_" + str(trial) + ".csv"
-            CSVFILENAME = FILENAME + "_" + str(trial) + ".csv"
-            with open(CSVFILENAME, "w") as fp:
-                for item in csv_list:
-                    # write each item on a new line
-                    fp.write("%s\n" % item)
-                print("Done", trial)
-
-            # Write deme sequences for analyis downstream
-            # open file in write mode
-            FASTAFILENAME = FILENAME + "_" + str(trial) + ".fasta"
-            with open(FASTAFILENAME, "w") as fp:
-                for item in fasta_list:
-                    # write each item on a new line
-                    fp.write("%s\n" % item)
-                print("Done", trial)
-
-            Resolution = csv_list[0].split(",")[2]
+        if (generation in snapshot_times) | (generation == number_generations - 1):
+            (FASTAFILENAME, CSVFILENAME, Resolution) = write_log_sequences(
+                demes, outfile_prefix, generation, labels, config_dict
+            )
             FASTAFILENAMES.append(FASTAFILENAME)
             CSVFILENAMES.append(CSVFILENAME)
 
     return ((FASTAFILENAMES, CSVFILENAMES), Resolution)
-
-
-def ancestral_deme_sequences_old(
-    Geometry,
-    number_of_chromosomes,
-    number_of_ploidy,
-    number_of_demes,
-    migration_rate,
-    restriction_rate,
-    mutation_rate,
-    sequence_length,
-    number_generations,
-):
-    demes = [[]] * number_of_demes
-    labels = []
-    for i, deme_sequences in enumerate(demes):
-        labels.append(alphabet[i])
-
-    for i, deme_sequences in enumerate(demes):
-        seq = ""
-        for j in range(sequence_length):
-            seq += str(random.randint(0, 3))
-        demes[i] = [seq] * number_of_chromosomes
-
-    for seq in demes:
-        print(seq[0])
-
-    for trial in range(number_generations):
-        temp_demes = []
-        for i, deme_sequences in enumerate(demes):
-            temp_demes.append(deme_sequences.copy())
-
-        # simulate coal foreward in time
-        for i, temp_sequences in enumerate(temp_demes):
-            temp_draws = []
-            for j, deme_sequences in enumerate(demes):
-                for k in range(int(number_of_chromosomes / number_of_demes)):
-                    draw = random.randint(0, number_of_chromosomes - 1)
-                    temp_draws.append(demes[j][draw])
-                random.shuffle(temp_draws)
-                temp_demes[i] = temp_draws
-
-        # update demes/pops with temp
-        pops = temp_demes
-
-        # mutate function
-        for i, deme_sequences in enumerate(demes):
-            for j, sequence in enumerate(deme_sequences):
-                for k, allele in enumerate(sequence):
-                    if random.randint(0, int(0.75 * mutation_rate)) == 0:
-                        demes[i][j] = (
-                            demes[i][j][:k]
-                            + str(random.randint(0, 3))
-                            + demes[i][j][k + 1 :]
-                        )
-
-    taxon_labels = []
-    csv_list = [",IDV,SUBPOP,ANC"]
-    fasta_list = []
-    for deme_count, deme in enumerate(demes):
-        for chromose_count, sequence in enumerate(deme):
-            sequence_bases = ""
-            for base in sequence:
-                sequence_bases += code_alphabet[str(base)]
-
-            fasta_list.append(
-                ">" + str(deme_count) + ".chromsome." + str(chromose_count)
-            )
-
-            csv_list.append(
-                str(deme_count)
-                + ".chromsome."
-                + str(chromose_count)
-                + ","
-                + str(deme_count)
-                + "."
-                + str(math.floor(chromose_count / 2))
-                + ","
-                + str(deme_count)
-                + ","
-            )
-
-            fasta_list.append(sequence_bases)
-        print()
-
-    # write deme data for analysis downstream
-    # open file in write mode
-    with open("./drift_simulation.csv", "w") as fp:
-        for item in csv_list:
-            # write each item on a new line
-            fp.write("%s\n" % item)
-            print(item)
-        print("Done")
-
-    # Write deme sequences for analyis downstream
-    # open file in write mode
-    with open("./drift_simulation.fasta", "w") as fp:
-        for item in fasta_list:
-            # write each item on a new line
-            fp.write("%s\n" % item)
-        print("Done")
