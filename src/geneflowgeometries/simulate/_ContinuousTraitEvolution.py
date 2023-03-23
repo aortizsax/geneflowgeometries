@@ -67,8 +67,10 @@ class Continuous_trait_deme:
 alphabet = string.ascii_lowercase
 
 
-def continuous_trait_evoluion(config_dict, outfile_prefix):
+def continuous_trait_evoluion(self):
     # pass to local variables
+    config_dict = self.config_dict
+    outfile_prefix = config_dict['outfile_prefix']
     Geometry = config_dict["simulator"]["geometry"]
     number_of_chromosomes = config_dict["simulator"]["number_of_chromosomes_per_deme"]
     number_of_demes = config_dict["simulator"]["number_of_demes"]

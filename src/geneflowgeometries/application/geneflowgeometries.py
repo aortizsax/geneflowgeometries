@@ -33,19 +33,7 @@
 # make config class
 # get set restriction
 
-
-# OOP class methods
-
-# ********3
-# demes_sequences class
-# simulation a method for demes
-# or
-# simulation a class that is used as inhertiance and acts on demes seq
-
-# config simulator class::dog 
-# inhertied into sequence/continuous_simulators::jackrussel,dachshund 
-
-
+#make this use OOP classes 
 
 
 import os
@@ -59,13 +47,17 @@ import numpy as np
 
 from geneflowgeometries.simulate import (
     _AncestralDemeSequences,
-    _ContinuousTraitEvolution,
-)
+    _ContinuousTraitEvolution
+    )
+from geneflowgeometries.simulate.Simulator import Simulator
 from geneflowgeometries.calculate import analyze
 
 import logging
 from geneflowgeometries.log.multi_handlers_logger import setup_logger
 from geneflowgeometries.config_parse.parse import read_config, read_args
+
+from geneflowgeometries.config_parse.Config import Config
+
 
 
 class InvalidMigrationRateException(Exception):
@@ -198,25 +190,27 @@ def main():
     else:
         (snapshot_times, config_dict, simulate_what) = read_args(args)
 
+
+    #START get set outfile_prefix
     outfile_prefix = np.array(list(config_dict["simulator"].values()))
     outfile_prefix = "_".join(outfile_prefix)
     outfile_prefix = outfile_prefix.replace(" ", "-")
+    #END get set outfile_prefix
+    
+    config_dict['outfile_prefix'] = outfile_prefix
+    
+    simulator = Simulator(config_dict)
+    
     setup_logger()
-    logging.info("Beginning")
+    logging.info("Beginning") #for check
 
     if simulate_what == "sequences":
-        print(config_dict)
-        #outfile module start
-        #outfile_prefix = np.array(list(config_dict["simulator"].values()))
-        #outfile_prefix = "_".join(outfile_prefix)
-        #outfile_prefix = outfile_prefix.replace(" ", "-")
-        #outfile module finish
         
-        print(outfile_prefix)
-        (filenames_snapshot, tag) = _AncestralDemeSequences.ancestral_deme_sequences(
-            config_dict, outfile_prefix
-        )
+        #SIMULATE
+        (filenames_snapshot, tag) = simulator.ancestralDemeSequences()
 
+
+        #ANALYSIS
         for i, fastafiles in enumerate(filenames_snapshot[0]):
             filenames = [filenames_snapshot[0][i], filenames_snapshot[1][i]]
             print("Analysis for ", filenames)
@@ -233,17 +227,9 @@ def main():
 
             analyze.wright_fis(sequence_dataframe, data_matrix, tag)
 
-            # analyze.pairwise_fst(sequence_dataframe, data_matrix,tag)
     else:
-        print(config_dict)
-        #outfile_prefix = np.array(list(config_dict["simulator"].values()))
-        #outfile_prefix = "_".join(outfile_prefix)
-        #outfile_prefix = outfile_prefix.replace(" ", "-")
-        print(outfile_prefix)
-
-        csvfile = _ContinuousTraitEvolution.continuous_trait_evoluion(
-            config_dict, outfile_prefix
-        )
+        #SIMULATE
+        csvfile = simulator.continuousTraitEvolution()
 
 
 if __name__ == "__main__":
