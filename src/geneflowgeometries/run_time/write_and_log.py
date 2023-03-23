@@ -101,7 +101,7 @@ def write_log_sequences(demes, outfile_prefix, generation, labels, config_dict):
     FILENAME = outfile_prefix
     CSVFILENAME = date + FILENAME + "_" + str(generation) + ".csv"
 
-    logging.info(json.dumps(outfile_prefix))
+    logging.info(json.dumps(outfile_prefix)) #as same line term = ,
     logging.info(json.dumps(generation))
     logging.info(json.dumps(config_dict))
 
