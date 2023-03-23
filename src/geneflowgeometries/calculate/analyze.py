@@ -41,6 +41,7 @@ from nyemtaay.parse.parser import read_fasta_files, read_metadata, to_dataframe
 from nyemtaay.calculate import populationgeneticstats
 from nyemtaay.mathlib import sterling
 from nyemtaay.tests.nuetrality import tajimas_d
+import logging
 
 
 def parse(filenames):
@@ -62,6 +63,7 @@ def parse(filenames):
 
 def nei_fst(sequences, metadata, deme_identifier):
     populationgeneticstats.nei_fst(sequences, metadata, deme_identifier)
+    logging.info("Analyzing nei fst for gen")
     return
 
 

@@ -8,8 +8,6 @@
         "migration_rate":0.1,
         "mutation_rate":0.0004,
         "sequence_length":1000,
-        "mean":0,
-        "standard_deviation":1,
         "simulation_time":2000,
         "number_of_simulations":200,
         "log_id":"log_DATE",

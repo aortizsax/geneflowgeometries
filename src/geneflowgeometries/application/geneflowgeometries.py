@@ -30,28 +30,22 @@
 ##
 ##############################################################################
 
-# arun code comments and readme
-# kelley gihub
-
+# make config class
 # get set restriction
-
-# json config file********
 
 
 # OOP class methods
-# pass config and output writers******
 
-# log handlers*
-
-# runtime context
-# loger
-# output handler
-#
-
+# ********3
 # demes_sequences class
 # simulation a method for demes
 # or
 # simulation a class that is used as inhertiance and acts on demes seq
+
+# config simulator class::dog 
+# inhertied into sequence/continuous_simulators::jackrussel,dachshund 
+
+
 
 
 import os
@@ -60,13 +54,18 @@ import sys
 import argparse
 import datetime
 import random
+import numpy as np
 
 
 from geneflowgeometries.simulate import (
-    ancestral_deme_sequences,
-    continuous_trait_evolution,
+    _AncestralDemeSequences,
+    _ContinuousTraitEvolution,
 )
 from geneflowgeometries.calculate import analyze
+
+import logging
+from geneflowgeometries.log.multi_handlers_logger import setup_logger
+from geneflowgeometries.config_parse.parse import read_config, read_args
 
 
 class InvalidMigrationRateException(Exception):
@@ -190,94 +189,33 @@ def main():
         help="Config file [default=%(default)s].",
     )
 
-
-###########################LOGGER
     args = parser.parse_args()
     print("Hello, simulation begining")
-    now = str(datetime.datetime.now())
 
-    print(now.split(" ")[0])
-    date = now.split(" ")[0]
-    main_log_row = now.split(" ")[0] + ","
-###############################
+    if args.config != "FILE":
+        (config_dict, simulate_what) = read_config(args)
 
-
-
-#**********************************CONFIG
-
-    import json
-    #Load the configuration file 
-    with open(args.config) as f:
-        config = f.read()
-    
-
-
-    config_dict = json.loads(config)
-    print(config_dict)
-    print(config_dict.keys())
-
-
-
-
-    # Pass args
-    simulate_what = config_dict['simulator']['simulate_sequences_or_continous']
-    print("Simulating", simulate_what)
-    Geometry = args.geometry
-    number_of_chromosomes = int(args.number_of_chromosomes_per_deme)
-    number_of_ploidy = int(args.number_of_chromosomes_per_invdividual)
-    number_of_demes = int(args.number_of_demes)
-    migration_rate = float(args.migration_rate)
-
-    try:
-        if migration_rate > 1 / number_of_demes:
-            raise InvalidMigrationRateException
-        else:
-            print("Valid migration rate")
-    except InvalidMigrationRateException:
-        print("Exception occurred: Invalid migration rate")
-        raise SystemExit(1)
-
-    mutation_rate = float(args.mutation_rate)
-    sequence_length = int(args.sequence_length)
-    simT = int(args.simulation_time)
-    start_mean = float(args.mean)
-    start_std = float(args.standard_deviation)
-    snapshot_times = [
-        1,
-        number_of_chromosomes,
-        5 * number_of_chromosomes,
-        10 * number_of_chromosomes,
-        20 * number_of_chromosomes,
-    ]
-    # random number
-    if args.seed == "random":
-        seed_range = 2**32 - 1
-        seed = int(random.uniform(0, seed_range))
     else:
-        seed = int(args.seed)
-#*********************************   
-        
-        
-        
-#############################
-    main_log_row += simulate_what + ","
-    main_log_row += Geometry + ","
-    main_log_row += str(number_of_chromosomes) + ","
-    main_log_row += str(number_of_ploidy) + ","
-    main_log_row += str(number_of_demes) + ","
-    main_log_row += str(migration_rate) + ","
-    main_log_row += str(mutation_rate) + ","
-    main_log_row += str(sequence_length) + ","
-    main_log_row += str(simT) + ","
-    main_log_row += str(snapshot_times) + ","
-######################
+        (snapshot_times, config_dict, simulate_what) = read_args(args)
 
+    outfile_prefix = np.array(list(config_dict["simulator"].values()))
+    outfile_prefix = "_".join(outfile_prefix)
+    outfile_prefix = outfile_prefix.replace(" ", "-")
+    setup_logger()
+    logging.info("Beginning")
 
-
-    # make config class dictionary
     if simulate_what == "sequences":
-        (filenames_snapshot, tag) = ancestral_deme_sequences.ancestral_deme_sequences(
-            config_dict)
+        print(config_dict)
+        #outfile module start
+        #outfile_prefix = np.array(list(config_dict["simulator"].values()))
+        #outfile_prefix = "_".join(outfile_prefix)
+        #outfile_prefix = outfile_prefix.replace(" ", "-")
+        #outfile module finish
+        
+        print(outfile_prefix)
+        (filenames_snapshot, tag) = _AncestralDemeSequences.ancestral_deme_sequences(
+            config_dict, outfile_prefix
+        )
 
         for i, fastafiles in enumerate(filenames_snapshot[0]):
             filenames = [filenames_snapshot[0][i], filenames_snapshot[1][i]]
@@ -297,12 +235,15 @@ def main():
 
             # analyze.pairwise_fst(sequence_dataframe, data_matrix,tag)
     else:
-        print(seed)
-        csvfile = continuous_trait_evolution.continuous_trait_evoluion(config_dict)
+        print(config_dict)
+        #outfile_prefix = np.array(list(config_dict["simulator"].values()))
+        #outfile_prefix = "_".join(outfile_prefix)
+        #outfile_prefix = outfile_prefix.replace(" ", "-")
+        print(outfile_prefix)
 
-    f = open("main.log", "a")
-    f.write(main_log_row)
-    f.close()
+        csvfile = _ContinuousTraitEvolution.continuous_trait_evoluion(
+            config_dict, outfile_prefix
+        )
 
 
 if __name__ == "__main__":
