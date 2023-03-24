@@ -197,10 +197,13 @@ def main():
     outfile_prefix = outfile_prefix.replace(" ", "-")
     #END get set outfile_prefix
     
+    #in the mean time
     config_dict['outfile_prefix'] = outfile_prefix
     
+    #inialize Simulator instance
     simulator = Simulator(config_dict)
     
+    #to check
     setup_logger()
     logging.info("Beginning") #for check
 

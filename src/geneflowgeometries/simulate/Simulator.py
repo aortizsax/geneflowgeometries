@@ -35,6 +35,8 @@ from geneflowgeometries.simulate import (
     _AncestralDemeSequences,
     _ContinuousTraitEvolution
     )
+    
+    #add analysis? or is this like pdm||new object entirely 
 
 class Simulator(Config):
         

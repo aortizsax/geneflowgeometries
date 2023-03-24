@@ -33,8 +33,9 @@
 #single line info 
 #multi line error flies
 
-# config simulator class 
-# inhertied into sequence/continuous_simulators 
+#circular logic 
+#local host save
+#terminator ,
 
 
 import logging
@@ -59,8 +60,10 @@ def setup_logger():
 
     log_format = logging.Formatter("[%(levelname)s] %(asctime)s - %(message)s")
 
-    stream_handler = logging.StreamHandler()#single line??
-    # change terminator to , #localhost
+    stream_handler = logging.StreamHandler()
+    # single line
+    # change terminator to , 
+    # localhost
     stream_handler.setFormatter(log_format)
     stream_handler.setLevel(logging.INFO)
     logger.addHandler(stream_handler)
