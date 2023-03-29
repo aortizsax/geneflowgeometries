@@ -30,10 +30,8 @@
 ##
 ##############################################################################
 
-# make config class
-# get set restriction
-
-#make this use OOP classes 
+#optional and overide args 
+#order of precendence 
 
 
 import os
@@ -47,8 +45,8 @@ import numpy as np
 
 from geneflowgeometries.simulate import (
     _AncestralDemeSequences,
-    _ContinuousTraitEvolution
-    )
+    _ContinuousTraitEvolution,
+)
 from geneflowgeometries.simulate.Simulator import Simulator
 from geneflowgeometries.calculate import analyze
 
@@ -59,18 +57,21 @@ from geneflowgeometries.config_parse.parse import read_config, read_args
 from geneflowgeometries.config_parse.Config import Config
 
 
-
 class InvalidMigrationRateException(Exception):
     "Raised when the input value is greater than 1/k, where k is the number of demes"
     pass
 
 
 def main():
-    parser = argparse.ArgumentParser(description=None)
+    parser = argparse.ArgumentParser(
+                        prog='geneflowgeometries',
+                        description=None,
+                        epilog=None)
 
     parser.add_argument(
         "-S",
         "--simulate-sequences-or-continous",
+        choices=["sequences","continuous"],
         action="store",
         default="sequences",
         help="Choose to simulate sequences or continous variable [default=%(default)s].",
@@ -78,29 +79,34 @@ def main():
     parser.add_argument(
         "-G",
         "--geometry",
+        choices=["complete graph","chain graph","random connectivity?"],
         action="store",
         default="complete graph",
-        help="Network/graph to simulate. Options: Complete, chain, or FILE [default=%(default)s].",
+        help="Network/graph to simulate. [default=%(default)s].",
     )
     parser.add_argument(
         "-N",
         "--number-of-chromosomes-per-deme",
         action="store",
         default=100,
+        type=int,
         help="Number of chromosomes per deme [default=%(default)s].",
     )
     parser.add_argument(
         "-P",
         "--number-of-chromosomes-per-invdividual",
+        choices=range(1,5),
         action="store",
         default=2,
+        type=int,
         help="Number of ploidy by organism [default=%(default)s].",
     )
-    parser.add_argument(
+    parser.add_argument(#add dynaimc max 
         "-k",
         "--number-of-demes",
         action="store",
         default=4,
+        type=int,
         help="Number of demes in simulation[default=%(default)s].",
     )
     parser.add_argument(
@@ -108,6 +114,7 @@ def main():
         "--migration-rate",
         action="store",
         default=0,
+        type=float,
         help="Migration rate across demes. Max = 1/k, where k is number of demes [default=%(default)s].",
     )
     parser.add_argument(
@@ -115,6 +122,7 @@ def main():
         "--mutation-rate",
         action="store",
         default=0.0004,
+        type=float,
         help="Mutation rate for gene simulaiton [default=%(default)s].",
     )
     parser.add_argument(
@@ -122,6 +130,7 @@ def main():
         "--sequence-length",
         action="store",
         default=1000,
+        type=int,
         help="Sequence length for gene simulaiton [default=%(default)s].",
     )
     parser.add_argument(
@@ -129,6 +138,7 @@ def main():
         "--mean",
         action="store",
         default=0,
+        type=float,
         help="Starting mean for simulating continous varible[default=%(default)s].",
     )
     parser.add_argument(
@@ -136,6 +146,7 @@ def main():
         "--standard-deviation",
         action="store",
         default=1,
+        type=float,
         help="Starting standard deviation for simulating continous varible[default=%(default)s].",
     )
     parser.add_argument(
@@ -143,6 +154,7 @@ def main():
         "--simulation-time",
         action="store",
         default=2000,
+        type=int,
         help="Number of generations to run simulation for [default=%(default)s].",
     )
     parser.add_argument(
@@ -150,6 +162,7 @@ def main():
         "--number-of-simulations",
         action="store",
         default=200,
+        type=int,
         help="Number of trials of simulations to run [default=%(default)s].",
     )
     parser.add_argument(
@@ -177,43 +190,46 @@ def main():
         "-cf",
         "--config",
         action="store",
-        default="FILE",
-        help="Config file [default=%(default)s].",
+        default=None,
+        help="Config file [default=%(default)s].", 
+        metavar="FILE"
     )
 
     args = parser.parse_args()
+    
     print("Hello, simulation begining")
 
-    if args.config != "FILE":
+
+
+
+
+    if args.config:
         (config_dict, simulate_what) = read_config(args)
 
+    #need override https://gist.github.com/gene1wood/9217725; args, unparsed = parser.parse_known_args()
     else:
-        (snapshot_times, config_dict, simulate_what) = read_args(args)
+        (config_dict, simulate_what) = read_args(args)
 
 
-    #START get set outfile_prefix
-    outfile_prefix = np.array(list(config_dict["simulator"].values()))
-    outfile_prefix = "_".join(outfile_prefix)
-    outfile_prefix = outfile_prefix.replace(" ", "-")
-    #END get set outfile_prefix
-    
-    #in the mean time
-    config_dict['outfile_prefix'] = outfile_prefix
-    
-    #inialize Simulator instance
-    simulator = Simulator(config_dict)
-    
-    #to check
+
+    # inialize Simulator instance
+    simulator = Simulator(Config(config_dict))
+
+    # to check
     setup_logger()
-    logging.info("Beginning") #for check
+    logging.info("Beginning")  # for check
 
     if simulate_what == "sequences":
+        # SIMULATE
+        simulator.ancestralDemeSequences()
         
-        #SIMULATE
-        (filenames_snapshot, tag) = simulator.ancestralDemeSequences()
-
-
-        #ANALYSIS
+        
+        
+        #analysis to OOP; be able to just pass simulator obj to Analysis(simulator)
+        filenames_snapshot = (simulator.sequence_files, simulator.metadata_files)
+        tag = simulator.resolution
+        
+        # ANALYSIS
         for i, fastafiles in enumerate(filenames_snapshot[0]):
             filenames = [filenames_snapshot[0][i], filenames_snapshot[1][i]]
             print("Analysis for ", filenames)
@@ -229,10 +245,16 @@ def main():
             analyze.by_deme_pairwise_fst(sequence_dataframe, data_matrix, tag)
 
             analyze.wright_fis(sequence_dataframe, data_matrix, tag)
+            
+            
+            
 
     else:
-        #SIMULATE
-        csvfile = simulator.continuousTraitEvolution()
+        # SIMULATE
+        simulator.continuousTraitEvolution()
+        
+        print(simulator.continuous_data_filename)
+        #pass to analysis OPP or something synomims to PDM 
 
 
 if __name__ == "__main__":

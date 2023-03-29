@@ -87,7 +87,7 @@ def ancestral_deme_sequences(config_dict, outfile_prefix):
         20 * number_of_chromosomes,
     ]
     seed = config_dict["simulator"]["seed"]
-    
+
     logger = logging.getLogger("geneflowgeometries.main.log")
 
     logging.info("Simulating")

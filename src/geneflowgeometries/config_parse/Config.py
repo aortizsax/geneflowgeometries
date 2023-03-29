@@ -30,6 +30,46 @@
 ##
 ##############################################################################
 
+import numpy as np
+import datetime
+
+
 class Config:
-    def __init__(self,config_dict):
+    def __init__(self, config_dict):
         self.config_dict = config_dict
+
+        # pass to local variables
+        self.geometry = config_dict["simulator"]["geometry"]
+        self.trait = config_dict["simulator"]["simulate_sequences_or_continous"]
+        self.number_of_chromosomes = config_dict["simulator"][
+            "number_of_chromosomes_per_deme"
+        ]
+        self.number_of_ploidy = config_dict["simulator"][
+            "number_of_chromosomes_per_invdividual"
+        ]
+        self.number_of_demes = config_dict["simulator"]["number_of_demes"]
+        self.migration_rate = config_dict["simulator"]["migration_rate"]
+        self.number_generations = config_dict["simulator"]["simulation_time"]
+        self.snapshot_times = [
+            1,
+            self.number_of_chromosomes,
+            5 * self.number_of_chromosomes,
+            10 * self.number_of_chromosomes,
+            20 * self.number_of_chromosomes,
+        ]
+        self.seed = config_dict["simulator"]["seed"]
+
+        if self.trait == "continuous":
+            self.start_mean = config_dict["simulator"]["mean"]
+            self.start_std = config_dict["simulator"]["standard_deviation"]
+        else:
+            self.mutation_rate = config_dict["simulator"]["mutation_rate"]
+            self.sequence_length = config_dict["simulator"]["sequence_length"]
+
+        self.seed = config_dict["simulator"]["seed"]
+
+        
+        outfile_prefix = np.array(list(config_dict["simulator"].values()))
+        outfile_prefix = "_".join(outfile_prefix)
+        outfile_prefix = outfile_prefix.replace(" ", "-")
+        self.outfile_prefix = outfile_prefix

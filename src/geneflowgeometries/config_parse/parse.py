@@ -31,6 +31,7 @@
 ##############################################################################
 import json
 import random
+import datetime
 
 
 def read_config(args):
@@ -39,6 +40,11 @@ def read_config(args):
         config = f.read()
 
     config_dict = json.loads(config)
+    
+    date = datetime.datetime.now()  # pull up in scripts
+    date = str(date).split(" ")[0]
+        
+    config_dict['simulator']['date'] = date
     simulate_what = config_dict["simulator"]["simulate_sequences_or_continous"]
     return (config_dict, simulate_what)
 
@@ -49,10 +55,10 @@ def read_args(args):
     simulate_what = args.simulate_sequences_or_continous
     print("Simulating", simulate_what)
     Geometry = args.geometry
-    number_of_chromosomes = int(args.number_of_chromosomes_per_deme)
-    number_of_ploidy = int(args.number_of_chromosomes_per_invdividual)
-    number_of_demes = int(args.number_of_demes)
-    migration_rate = float(args.migration_rate)
+    number_of_chromosomes = args.number_of_chromosomes_per_deme
+    number_of_ploidy = args.number_of_chromosomes_per_invdividual
+    number_of_demes = args.number_of_demes
+    migration_rate = args.migration_rate
 
     try:
         if migration_rate > 1 / number_of_demes:
@@ -63,11 +69,11 @@ def read_args(args):
         print("Exception occurred: Invalid migration rate")
         raise SystemExit(1)
 
-    mutation_rate = float(args.mutation_rate)
-    sequence_length = int(args.sequence_length)
-    simT = int(args.simulation_time)
-    start_mean = float(args.mean)
-    start_std = float(args.standard_deviation)
+    mutation_rate = args.mutation_rate
+    sequence_length = args.sequence_length
+    simT = args.simulation_time
+    start_mean = args.mean
+    start_std = args.standard_deviation
     snapshot_times = [
         1,
         number_of_chromosomes,
@@ -75,6 +81,7 @@ def read_args(args):
         10 * number_of_chromosomes,
         20 * number_of_chromosomes,
     ]
+    
     # random number
     if args.seed == "random":
         seed_range = 2**32 - 1
@@ -82,8 +89,12 @@ def read_args(args):
     else:
         seed = int(args.seed)
 
+    date = datetime.datetime.now()  # pull up in scripts
+    date = str(date).split(" ")[0]
+
     config_dict = {
         "simulator": {
+            "date": date,
             "simulate_sequences_or_continous": simulate_what,
             "geometry": Geometry,
             "number_of_chromosomes_per_deme": number_of_chromosomes,
@@ -101,4 +112,4 @@ def read_args(args):
             "seed": seed,
         }
     }
-    return (snapshot_times, config_dict, simulate_what)
+    return (config_dict, simulate_what)
