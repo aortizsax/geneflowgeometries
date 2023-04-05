@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 ##############################################################################
-## Copyright (c) 2023 Adrian Ortiz.
+## Copyright (c) 2023 Adrian Ortiz-Velez and Jeet Sukumaran.
 ## All rights reserved.
 ##
 ## Redistribution and use in source and binary forms, with or without
@@ -20,18 +20,27 @@
 ## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ## ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 ## WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-## DISCLAIMED. IN NO EVENT SHALL ADRIAN ORTIZ-VELEZ BE LIABLE FOR ANY DIRECT,
-## INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-## BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-## DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-## LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-## OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-## ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+## DISCLAIMED. IN NO EVENT SHALL ADRIAN ORTIZ-VELEZ OR JEET SUKUMARAN BE LIABLE
+## FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+## DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+## SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+## CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+## OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##
 ##############################################################################
+
 import json
 import random
 import datetime
+
+from geneflowgeometries.config_parse.Config import Config
+
+
+class InvalidMigrationRateException(Exception):
+    "Raised when the input value is greater than 1/k, where k is the number of demes"
+    pass
+
 
 
 def read_config(args):
@@ -39,21 +48,32 @@ def read_config(args):
     with open(args.config) as f:
         config = f.read()
 
-    config_dict = json.loads(config)
-    
+        
     date = datetime.datetime.now()  # pull up in scripts
     date = str(date).split(" ")[0]
-        
+    config_dict = {'simulator':{}}
     config_dict['simulator']['date'] = date
+
+    json_dict = json.loads(config)
+    
+    config_dict['simulator'].update(json_dict['simulator'])
+
+
     simulate_what = config_dict["simulator"]["simulate_sequences_or_continous"]
-    return (config_dict, simulate_what)
+    
+    Configuration = Config(config_dict)
+    
+    return Configuration
 
 
 def read_args(args):
     # **********************************args to module
     # Pass args
+    print(args)
     simulate_what = args.simulate_sequences_or_continous
     print("Simulating", simulate_what)
+        
+
     Geometry = args.geometry
     number_of_chromosomes = args.number_of_chromosomes_per_deme
     number_of_ploidy = args.number_of_chromosomes_per_invdividual
@@ -112,4 +132,8 @@ def read_args(args):
             "seed": seed,
         }
     }
-    return (config_dict, simulate_what)
+    
+    
+    Configuration = Config(config_dict)
+    
+    return Configuration
