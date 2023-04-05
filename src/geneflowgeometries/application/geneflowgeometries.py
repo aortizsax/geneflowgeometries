@@ -31,13 +31,13 @@
 ##############################################################################
 
 
-#directive from last week get ancsequences to OOP
-#additionally continuous trait, argparse, 
+# directive from last week get ancsequences to OOP
+# additionally continuous trait, argparse, 
 
 
-#my to do 
-#override args
-#analysis OOP
+# my to do 
+# likely incorrect modularization of writing files(but close),
+# analysis OOP
 
 
 
@@ -49,11 +49,6 @@ import datetime
 import random
 import numpy as np
 
-
-from geneflowgeometries.simulate import (
-    _AncestralDemeSequences,
-    _ContinuousTraitEvolution,
-)
 from geneflowgeometries.simulate.Simulator import Simulator
 from geneflowgeometries.calculate import analyze
 
@@ -146,14 +141,12 @@ def main():
         "--geometry",
         choices=["complete graph","chain graph","random connectivity?"],
         action="store",
-        default="complete graph",
         help="Network/graph to simulate. [default=%(default)s].",
     )
     main_parser.add_argument(
         "-N",
         "--number-of-chromosomes-per-deme",
         action="store",
-        default=100,
         type=int,
         help="Number of chromosomes per deme [default=%(default)s].",
     )
@@ -162,7 +155,6 @@ def main():
         "--number-of-chromosomes-per-invdividual",
         choices=range(1,5),
         action="store",
-        default=2,
         type=int,
         help="Number of ploidy by organism [default=%(default)s].",
     )
@@ -170,7 +162,6 @@ def main():
         "-k",
         "--number-of-demes",
         action="store",
-        default=4,
         type=int,
         help="Number of demes in simulation[default=%(default)s].",
     )
@@ -178,7 +169,6 @@ def main():
         "-m",
         "--migration-rate",
         action="store",
-        default=0,
         type=float,
         help="Migration rate across demes. Max = 1/k, where k is number of demes [default=%(default)s].",
     )
@@ -186,7 +176,6 @@ def main():
         "-mut",
         "--mutation-rate",
         action="store",
-        default=0.0004,
         type=float,
         help="Mutation rate for gene simulaiton [default=%(default)s].",
     )
@@ -194,7 +183,6 @@ def main():
         "-L",
         "--sequence-length",
         action="store",
-        default=1000,
         type=int,
         help="Sequence length for gene simulaiton [default=%(default)s].",
     )
@@ -202,7 +190,6 @@ def main():
         "-mean",
         "--mean",
         action="store",
-        default=0,
         type=float,
         help="Starting mean for simulating continous varible[default=%(default)s].",
     )
@@ -210,7 +197,6 @@ def main():
         "-std",
         "--standard-deviation",
         action="store",
-        default=1,
         type=float,
         help="Starting standard deviation for simulating continous varible[default=%(default)s].",
     )
@@ -218,7 +204,6 @@ def main():
         "-simT",
         "--simulation-time",
         action="store",
-        default=2000,
         type=int,
         help="Number of generations to run simulation for [default=%(default)s].",
     )
@@ -226,7 +211,6 @@ def main():
         "-simK",
         "--number-of-simulations",
         action="store",
-        default=200,
         type=int,
         help="Number of trials of simulations to run [default=%(default)s].",
     )
@@ -234,21 +218,18 @@ def main():
         "-id",
         "--log-id",
         action="store",
-        default="log-DATE",
         help="Filename for log files [default=%(default)s].",
     )
     main_parser.add_argument(
         "-o",
         "--output-prefix",
         action="store",
-        default="output",
         help="Prefix for output files [default=%(default)s].",
     )
     main_parser.add_argument(
         "-s",
         "--seed",
         action="store",
-        default="random",
         help="Seed for reproducibilty [default=%(default)s].",
     )
     
@@ -257,11 +238,22 @@ def main():
     main_args = main_parser.parse_args(args)
     
     # where did the value of each argument come from?
-    logger.info("Option 1: {}".format(main_args.option1))
-    logger.info("Option 2: {}".format(main_args.option2))
-    logger.info("Option 2: {}".format(main_args.seed))
+    logger.info("Seed: {}".format(main_args.seed))
 
-    
+    logger.info("simulate_sequences_or_continous: {}".format(main_args.simulate_sequences_or_continous))
+    logger.info("geometry: {}".format(main_args.geometry))
+    logger.info("number_of_chromosomes_per_deme: {}".format(main_args.number_of_chromosomes_per_deme))
+    logger.info("number_of_chromosomes_per_invdividual: {}".format(main_args.number_of_chromosomes_per_invdividual))
+    logger.info("number_of_demes: {}".format(main_args.number_of_demes))
+    logger.info("migration_rate: {}".format(main_args.migration_rate))
+    logger.info("mutation_rate: {}".format(main_args.mutation_rate))
+    logger.info("sequence_length: {}".format(main_args.sequence_length))
+    logger.info("simulation_time: {}".format(main_args.simulation_time))
+    logger.info("number_of_simulations: {}".format(main_args.number_of_simulations))
+    logger.info("log_id: {}".format(main_args.log_id))
+    logger.info("output_prefix: {}".format(main_args.output_prefix))
+    logger.info("mean: {}".format(main_args.mean))
+    logger.info("standard_deviation: {}".format(main_args.standard_deviation))
     print("Hello, simulation begining")
 
 
