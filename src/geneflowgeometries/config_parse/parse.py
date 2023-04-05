@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 ##############################################################################
-## Copyright (c) 2023 Adrian Ortiz.
+## Copyright (c) 2023 Adrian Ortiz-Velez and Jeet Sukumaran.
 ## All rights reserved.
 ##
 ## Redistribution and use in source and binary forms, with or without
@@ -20,17 +20,27 @@
 ## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ## ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 ## WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-## DISCLAIMED. IN NO EVENT SHALL ADRIAN ORTIZ-VELEZ BE LIABLE FOR ANY DIRECT,
-## INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-## BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-## DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-## LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-## OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-## ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+## DISCLAIMED. IN NO EVENT SHALL ADRIAN ORTIZ-VELEZ OR JEET SUKUMARAN BE LIABLE
+## FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+## DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+## SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+## CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+## OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##
 ##############################################################################
+
 import json
 import random
+import datetime
+
+from geneflowgeometries.config_parse.Config import Config
+
+
+class InvalidMigrationRateException(Exception):
+    "Raised when the input value is greater than 1/k, where k is the number of demes"
+    pass
+
 
 
 def read_config(args):
@@ -38,21 +48,37 @@ def read_config(args):
     with open(args.config) as f:
         config = f.read()
 
-    config_dict = json.loads(config)
+        
+    date = datetime.datetime.now()  # pull up in scripts
+    date = str(date).split(" ")[0]
+    config_dict = {'simulator':{}}
+    config_dict['simulator']['date'] = date
+
+    json_dict = json.loads(config)
+    
+    config_dict['simulator'].update(json_dict['simulator'])
+
+
     simulate_what = config_dict["simulator"]["simulate_sequences_or_continous"]
-    return (config_dict, simulate_what)
+    
+    Configuration = Config(config_dict)
+    
+    return Configuration
 
 
 def read_args(args):
     # **********************************args to module
     # Pass args
+    print(args)
     simulate_what = args.simulate_sequences_or_continous
     print("Simulating", simulate_what)
+        
+
     Geometry = args.geometry
-    number_of_chromosomes = int(args.number_of_chromosomes_per_deme)
-    number_of_ploidy = int(args.number_of_chromosomes_per_invdividual)
-    number_of_demes = int(args.number_of_demes)
-    migration_rate = float(args.migration_rate)
+    number_of_chromosomes = args.number_of_chromosomes_per_deme
+    number_of_ploidy = args.number_of_chromosomes_per_invdividual
+    number_of_demes = args.number_of_demes
+    migration_rate = args.migration_rate
 
     try:
         if migration_rate > 1 / number_of_demes:
@@ -63,11 +89,11 @@ def read_args(args):
         print("Exception occurred: Invalid migration rate")
         raise SystemExit(1)
 
-    mutation_rate = float(args.mutation_rate)
-    sequence_length = int(args.sequence_length)
-    simT = int(args.simulation_time)
-    start_mean = float(args.mean)
-    start_std = float(args.standard_deviation)
+    mutation_rate = args.mutation_rate
+    sequence_length = args.sequence_length
+    simT = args.simulation_time
+    start_mean = args.mean
+    start_std = args.standard_deviation
     snapshot_times = [
         1,
         number_of_chromosomes,
@@ -75,6 +101,7 @@ def read_args(args):
         10 * number_of_chromosomes,
         20 * number_of_chromosomes,
     ]
+    
     # random number
     if args.seed == "random":
         seed_range = 2**32 - 1
@@ -82,8 +109,12 @@ def read_args(args):
     else:
         seed = int(args.seed)
 
+    date = datetime.datetime.now()  # pull up in scripts
+    date = str(date).split(" ")[0]
+
     config_dict = {
         "simulator": {
+            "date": date,
             "simulate_sequences_or_continous": simulate_what,
             "geometry": Geometry,
             "number_of_chromosomes_per_deme": number_of_chromosomes,
@@ -101,4 +132,8 @@ def read_args(args):
             "seed": seed,
         }
     }
-    return (snapshot_times, config_dict, simulate_what)
+    
+    
+    Configuration = Config(config_dict)
+    
+    return Configuration

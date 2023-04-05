@@ -30,11 +30,12 @@
 ##
 ##############################################################################
 
-#single line info 
-#multi line error flies
+# single line info
+# multi line error flies
 
-# config simulator class 
-# inhertied into sequence/continuous_simulators 
+# circular logic
+# local host save
+# terminator ,
 
 
 import logging
@@ -45,6 +46,7 @@ from geneflowgeometries.simulate import (
     continuous_trait_evolution,
 )
 import datetime
+
 
 def setup_logger():
     MAX_BYTES = 10000000  # Maximum size for a log file
@@ -59,34 +61,41 @@ def setup_logger():
 
     log_format = logging.Formatter("[%(levelname)s] %(asctime)s - %(message)s")
 
-    stream_handler = logging.StreamHandler()#single line??
-    # change terminator to , #localhost
+    stream_handler = logging.StreamHandler()
+    # single line
+    # change terminator to ,
+    # localhost
     stream_handler.setFormatter(log_format)
     stream_handler.setLevel(logging.INFO)
     logger.addHandler(stream_handler)
 
-    info_handler = RotatingFileHandler( 
-    #for single line DATE,seed,parameters,jsondump of simulation data, metadata files, and analysis
-        "main.info.log", maxBytes=MAX_BYTES, backupCount=BACKUP_COUNT
+    info_handler = RotatingFileHandler(
+        # for single line DATE,seed,parameters,jsondump of simulation data, metadata files, and analysis
+        "main.info.log",
+        maxBytes=MAX_BYTES,
+        backupCount=BACKUP_COUNT,
     )
     info_handler.setFormatter(log_format)
     info_handler.setLevel(logging.INFO)
     logger.addHandler(info_handler)
-    
-    
+
     date = datetime.datetime.now()
-    date = str(date).replace(' ','_').split('.')[0]
-    experiment_handler = RotatingFileHandler( 
-    #for multi line DATE,seed,parameters,jsondump of simulation data, metadata files, and analysis
-        date+"_experiment.info.log", maxBytes=MAX_BYTES, backupCount=BACKUP_COUNT
+    date = str(date).replace(" ", "_").split(".")[0]
+    experiment_handler = RotatingFileHandler(
+        # for multi line DATE,seed,parameters,jsondump of simulation data, metadata files, and analysis
+        date + "_experiment.info.log",
+        maxBytes=MAX_BYTES,
+        backupCount=BACKUP_COUNT,
     )
     experiment_handler.setFormatter(log_format)
     experiment_handler.setLevel(logging.INFO)
     logger.addHandler(experiment_handler)
 
-    error_handler = RotatingFileHandler( 
-    #for multi line high mig rate, etc
-        "main.error.log", maxBytes=MAX_BYTES, backupCount=BACKUP_COUNT
+    error_handler = RotatingFileHandler(
+        # for multi line high mig rate, etc
+        "main.error.log",
+        maxBytes=MAX_BYTES,
+        backupCount=BACKUP_COUNT,
     )
     error_handler.setFormatter(log_format)
     error_handler.setLevel(logging.ERROR)

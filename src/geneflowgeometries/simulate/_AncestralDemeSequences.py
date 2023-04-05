@@ -69,12 +69,13 @@ nuc_alphabet = ["A", "T", "C", "G"]
 alphabet = string.ascii_lowercase
 
 
-#self is a Simulator
+# self is a Simulator
+
 
 def ancestral_deme_sequences(self):
     # pass to local variables
     config_dict = self.config_dict
-    outfile_prefix = config_dict['outfile_prefix']
+    outfile_prefix = config_dict["outfile_prefix"]
     Geometry = config_dict["simulator"]["geometry"]
     number_of_chromosomes = config_dict["simulator"]["number_of_chromosomes_per_deme"]
     number_of_ploidy = config_dict["simulator"]["number_of_chromosomes_per_invdividual"]
@@ -91,7 +92,7 @@ def ancestral_deme_sequences(self):
         20 * number_of_chromosomes,
     ]
     seed = config_dict["simulator"]["seed"]
-    
+
     logger = logging.getLogger("geneflowgeometries.main.log")
 
     logging.info("Simulating")

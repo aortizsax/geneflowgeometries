@@ -34,12 +34,13 @@ import datetime
 import math
 import logging
 import json
-#from geneflowgeometries.log.multi_handlers_logger import setup_logger
+
+# from geneflowgeometries.log.multi_handlers_logger import setup_logger
 
 
 def write_log_analysis():
     logging.info("Analyzing")
-    return 
+    return
 
 
 def write_log_continuous(csv_list, outfile_prefix):
@@ -95,13 +96,13 @@ def write_log_sequences(demes, outfile_prefix, generation, labels, config_dict):
 
     # write deme data for analysis downstream
     # open file in write mode
-    date = datetime.datetime.now()  #pull up in scripts
+    date = datetime.datetime.now()  # pull up in scripts
     date = str(date).split(" ")[0]
 
     FILENAME = outfile_prefix
     CSVFILENAME = date + FILENAME + "_" + str(generation) + ".csv"
 
-    logging.info(json.dumps(outfile_prefix)) #as same line term = ,
+    logging.info(json.dumps(outfile_prefix))  # as same line term = ,
     logging.info(json.dumps(generation))
     logging.info(json.dumps(config_dict))
 
