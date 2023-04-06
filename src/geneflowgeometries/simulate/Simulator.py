@@ -53,12 +53,12 @@ from geneflowgeometries.config_parse.Config import Config
 
 # Classes
 ################################################################################
-### Chromosome
+## Chromosome
 class Chromosome:
     """
     """
     ############################################################################
-    ## Life-cycle
+    # Life-cycle
     def __init__(self, sequence, ancenstral_deme):
         """
         Construct a new ...
@@ -78,7 +78,7 @@ class Chromosome:
         self.ancenstral_deme = ancenstral_deme
 
     ############################################################################
-    ## Representation
+    ### Representation
     
     def __str__(self):
         """
@@ -104,7 +104,7 @@ class Continuous_trait_deme:
     """
 
     ############################################################################
-    ## Life-cycle
+    ### Life-cycle
     def __init__(self, mean, std, deme):
         """
         Construct a new ...
@@ -125,7 +125,7 @@ class Continuous_trait_deme:
         self.deme = deme
     
     ############################################################################
-    ## Representation
+    ### Representation
     
     def __str__(self):
         """
@@ -146,7 +146,7 @@ class Continuous_trait_deme:
         return "Deme:" + self.deme + ",Mean:" + self.mean + ",Std:" + self.std
 
 ################################################################################
-### Simulator
+## Simulator
 class Simulator:
     """
     """
@@ -156,7 +156,7 @@ class Simulator:
     alphabet = string.ascii_lowercase
 
     ############################################################################
-    ## Life-cycle
+    ### Life-cycle
 
     def __init__(self, Configuration):# configuation is a Config obj
         """
@@ -205,7 +205,7 @@ class Simulator:
         return self.migration_matrix
         
     ############################################################################
-    ## Initialze Demes
+    ### Initialze Demes
 
     def labels(self):
         """
@@ -217,7 +217,7 @@ class Simulator:
 
 
     ############################################################################
-    ## Initialize Sequnce Model
+    ### Initialize Sequnce Model
 
     def startingSequences(self):
         """
@@ -244,7 +244,7 @@ class Simulator:
         return
 
     ############################################################################
-    ## Mutate
+    ### Mutate
 
     def mutate(self):
         """
@@ -272,7 +272,7 @@ class Simulator:
                         )
 
     ############################################################################
-    ## Simulate
+    ### Simulate
 
     def ancestralDemeSequences(self):
         """
@@ -317,7 +317,7 @@ class Simulator:
         
         
     ############################################################################
-    ## Write sequence traits to files 
+    ### Write sequence traits to files 
 
     def writeSnapShots(self):
         """
@@ -375,7 +375,10 @@ class Simulator:
         
         # write deme data for analysis downstream
         # open file in write mode
-        self.metadata_filename = self.Configuration.outfile_prefix + "_" + str(self.generation) + ".csv"
+        self.metadata_filename = self.Configuration.outfile_prefix 
+        self.metadata_filename =+ "_" 
+        self.metadata_filename =+ str(self.generation) 
+        self.metadata_filename =+ ".csv"
 
         with open(self.metadata_filename, "w") as fp:
             for item in csv_list:
@@ -385,7 +388,10 @@ class Simulator:
 
         # Write deme sequences for analyis downstream
         # open file in write mode
-        self.sequence_filename = self.Configuration.outfile_prefix + "_" + str(self.generation) + ".fasta"
+        self.sequence_filename = self.Configuration.outfile_prefix 
+        self.sequence_filename =+ "_" 
+        self.sequence_filename =+ str(self.generation) 
+        self.sequence_filename =+ ".fasta"
         with open(self.sequence_filename, "w") as fp:
             for item in fasta_list:
                 # write each item on a new line
@@ -401,7 +407,7 @@ class Simulator:
 
         
     ############################################################################
-    ## Initialize Continuous Model
+    ### Initialize Continuous Model
 
     def startingContinuousTrait(self):
         """

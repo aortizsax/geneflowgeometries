@@ -41,10 +41,6 @@
 import logging
 from logging.handlers import RotatingFileHandler
 import geneflowgeometries
-from geneflowgeometries.simulate import (
-    ancestral_deme_sequences,
-    continuous_trait_evolution,
-)
 import datetime
 
 
