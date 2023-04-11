@@ -614,9 +614,11 @@ class Simulator:
         
     def plot_continuous(self):
         """
+        Clean up and format plots 
         """
         continuous_dict = {}
-        for i, filename in enumerate(self.continuous_trial_files[::2]):
+        continuous_mean_difference_list = []
+        for i, filename in enumerate(self.continuous_trial_files[::2]): 
             means = pd.read_csv(filename)
             
             print(means.iloc[-1].tolist()[1:])
@@ -624,16 +626,30 @@ class Simulator:
             for ii, meani in enumerate(means.iloc[-1].tolist()[1:]):
                 for j, meanj in enumerate(means.iloc[-1].tolist()[1:]):
                     if ii != j:            
-                        pairwise_difference_row.append((meani-meanj) ** 2 )
+                        pairwise_difference_row.append(abs(meani-meanj)) 
             print(pairwise_difference_row)
             continuous_dict[i] = pairwise_difference_row
+            for difference in pairwise_difference_row:
+                continuous_mean_difference_list.append(difference)
             
             print(continuous_dict)
-        df = pd.DataFrame(continuous_dict)
-        print(df)
-        df.plot(kind='hist')
-        df.hist()
+        #df = pd.DataFrame(continuous_dict)
+        #print(df)
+        #df.plot(kind='hist')
+        #df.hist()
+        #plt.show()
+        plt.hist(continuous_mean_difference_list, bins="auto")
+        plt.xlabel("Change in mean from first (0th) and last cell (8th)")
+        plt.ylabel("Count")
         plt.show()
+        
+        
+        continuous_mean_square_difference_list = np.square(continuous_mean_difference_list)
+        plt.hist(continuous_mean_square_difference_list, bins="auto")
+        plt.xlabel("Change in mean from first (0th) and last cell (8th)")
+        plt.ylabel("Count")
+        plt.show()
+        
     
         return None
 

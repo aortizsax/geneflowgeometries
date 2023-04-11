@@ -65,19 +65,19 @@ def parse(filenames):
 def nei_fst(sequences, metadata, deme_identifier):
     populationgeneticstats.nei_fst(sequences, metadata, deme_identifier)
     logging.info("Analyzing nei fst for gen")
-    return
+    return None
 
 
 def by_deme_pairwise_fst(sequences, metadata, deme_identifier):
     populationgeneticstats.by_deme_pairwise_fst(sequences, metadata, deme_identifier)
 
-    return
+    return None
 
 
 def weir_cockerman_fst():
     populationgeneticstats.weir_cockerman_fst(sequences, metadata, deme_identifier)
 
-    return
+    return None
 
 
 def weir_goudet_population_specific_fst(sequences, metadata, deme_identifier):
@@ -85,22 +85,29 @@ def weir_goudet_population_specific_fst(sequences, metadata, deme_identifier):
         sequences, metadata, deme_identifier
     )
 
-    return
+    return None
     #
 
 
 def wright_fis(sequences, metadata, deme_identifier):
     populationgeneticstats.wright_fis(sequences, metadata, deme_identifier)
 
-    return
+    return None
 
+
+def plot_fst(fst_network_dataframe):
+    #networkx target, ..., (un)directed, weight
+
+    return None
 
 def plot_ancenstal_snapshots():
-    return
+
+    return None
 
 
 def plot_():
-    return
+
+    return None
 
 
 # WRIGHT Fst
