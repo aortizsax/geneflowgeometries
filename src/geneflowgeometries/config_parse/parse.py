@@ -21,11 +21,11 @@
 ## ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 ## WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 ## DISCLAIMED. IN NO EVENT SHALL ADRIAN ORTIZ-VELEZ OR JEET SUKUMARAN BE LIABLE
-## FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
-## DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
-## SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
-## CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
-## OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+## FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+## DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+## SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+## CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+## OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##
 ##############################################################################
@@ -42,28 +42,25 @@ class InvalidMigrationRateException(Exception):
     pass
 
 
-
 def read_config(args):
     # Load the configuration file
     with open(args.config) as f:
         config = f.read()
 
-        
     date = datetime.datetime.now()  # pull up in scripts
     date = str(date).split(" ")[0]
-    config_dict = {'simulator':{}}
-    config_dict['simulator']['date'] = date
+    config_dict = {"simulator": {}}
+    config_dict["simulator"]["date"] = date
 
     json_dict = json.loads(config)
-    
-    config_dict['simulator'].update(json_dict['simulator'])
 
+    config_dict["simulator"].update(json_dict["simulator"])
 
     simulate_what = config_dict["simulator"]["simulate_sequences_or_continous"]
-    
-    Configuration = Config(config_dict)
-    
-    return Configuration
+
+    configuration = Config(config_dict)
+
+    return configuration
 
 
 def read_args(args):
@@ -72,7 +69,6 @@ def read_args(args):
     print(args)
     simulate_what = args.simulate_sequences_or_continous
     print("Simulating", simulate_what)
-        
 
     Geometry = args.geometry
     number_of_chromosomes = args.number_of_chromosomes_per_deme
@@ -101,10 +97,10 @@ def read_args(args):
         10 * number_of_chromosomes,
         20 * number_of_chromosomes,
     ]
-    
+
     # random number
     if args.seed == "random":
-        seed_range = 2**32 - 1
+        seed_range = 2 ** 32 - 1
         seed = int(random.uniform(0, seed_range))
     else:
         seed = int(args.seed)
@@ -132,8 +128,7 @@ def read_args(args):
             "seed": seed,
         }
     }
-    
-    
-    Configuration = Config(config_dict)
-    
-    return Configuration
+
+    configuration = Config(config_dict)
+
+    return configuration
