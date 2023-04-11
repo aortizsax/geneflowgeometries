@@ -617,12 +617,23 @@ class Simulator:
         """
         continuous_dict = {}
         for i, filename in enumerate(self.continuous_trial_files[::2]):
-            print(filename)
             means = pd.read_csv(filename)
+            
             print(means.iloc[-1].tolist()[1:])
-            means.iloc[-1].plot()
-            continuous_dict[i] = means.iloc[-1].tolist()[1:]
-        
+            pairwise_difference_row = []
+            for ii, meani in enumerate(means.iloc[-1].tolist()[1:]):
+                for j, meanj in enumerate(means.iloc[-1].tolist()[1:]):
+                    if ii != j:            
+                        pairwise_difference_row.append((meani-meanj) ** 2 )
+            print(pairwise_difference_row)
+            continuous_dict[i] = pairwise_difference_row
+            
+            print(continuous_dict)
+        df = pd.DataFrame(continuous_dict)
+        print(df)
+        df.plot(kind='hist')
+        df.hist()
+        plt.show()
     
         return None
 
