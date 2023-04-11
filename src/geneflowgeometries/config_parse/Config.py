@@ -21,11 +21,11 @@
 ## ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 ## WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 ## DISCLAIMED. IN NO EVENT SHALL ADRIAN ORTIZ-VELEZ OR JEET SUKUMARAN BE LIABLE
-## FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
-## DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
-## SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
-## CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
-## OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+## FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+## DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+## SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+## CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+## OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##
 ##############################################################################
@@ -39,7 +39,7 @@ class Config:
     """
     Bin
     """
-    
+
     ############################################################################
     ## Life cycle
     def __init__(self, config_dict):
@@ -59,7 +59,7 @@ class Config:
         ]
         self.number_of_demes = config_dict["simulator"]["number_of_demes"]
         self.migration_rate = config_dict["simulator"]["migration_rate"]
-        self.restriction_rate = 1 - self.migration_rate 
+        self.restriction_rate = 1 - self.migration_rate
         self.number_generations = config_dict["simulator"]["simulation_time"]
         self.snapshot_times = [
             1,
@@ -79,7 +79,6 @@ class Config:
 
         self.seed = config_dict["simulator"]["seed"]
 
-        
         outfile_prefix = np.array(list(config_dict["simulator"].values()))
         outfile_prefix = "_".join(outfile_prefix)
         outfile_prefix = outfile_prefix.replace(" ", "-")

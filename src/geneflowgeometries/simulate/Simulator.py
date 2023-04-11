@@ -21,11 +21,11 @@
 ## ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 ## WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 ## DISCLAIMED. IN NO EVENT SHALL ADRIAN ORTIZ-VELEZ OR JEET SUKUMARAN BE LIABLE
-## FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
-## DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
-## SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
-## CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
-## OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+## FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+## DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+## SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+## CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+## OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##
 ##############################################################################
@@ -35,7 +35,6 @@ This module handles the core definition of the simulation data class as well as
 the analysis data class that performs pop gen and entropy calculations on the 
 data.
 """
-#why inherit obj in some and not tothers 
 
 
 import numpy as np
@@ -57,6 +56,7 @@ from geneflowgeometries.config_parse.Config import Config
 class Chromosome:
     """
     """
+
     ############################################################################
     # Life-cycle
     def __init__(self, sequence, ancenstral_deme):
@@ -79,7 +79,7 @@ class Chromosome:
 
     ############################################################################
     ### Representation
-    
+
     def __str__(self):
         """
                 Composes and returns and representation of the 
@@ -123,10 +123,10 @@ class Continuous_trait_deme:
         self.mean = mean
         self.std = std
         self.deme = deme
-    
+
     ############################################################################
     ### Representation
-    
+
     def __str__(self):
         """
         Composes and returns and representation of the 
@@ -145,20 +145,22 @@ class Continuous_trait_deme:
         """
         return "Deme:" + self.deme + ",Mean:" + self.mean + ",Std:" + self.std
 
+
 ################################################################################
 ## Simulator
 class Simulator:
     """
     """
-    import string
 
+    import string
 
     alphabet = string.ascii_lowercase
 
     ############################################################################
     ### Life-cycle
 
-    def __init__(self, Configuration):# configuation is a Config obj
+#    def __init__(self, configuration):  # configuation is a Config obj
+    def __init__(self, configuration):  # configuation is a Config obj
         """
         Construct a new ...
         
@@ -173,41 +175,40 @@ class Simulator:
         Returns
         -------
         """
-        print(Configuration)
-        self.Configuration = Configuration
+        print(configuration)
+        self.configuration = configuration
         # intialize demes
-        self.demes = [[]] * self.Configuration.number_of_demes
-        
+        self.demes = [[]] * self.configuration.number_of_demes
+
         # intialize rand generator and set seed
-        self.rng = default_rng(self.Configuration.seed)
+        self.rng = default_rng(self.configuration.seed)
 
-        self.labels()
-        self.migrationMatrix()
+        self.set_labels()
+        self.calculate_migration_matrix()
 
-        return
-    
-    def migrationMatrix(self):
+
+    def calculate_migration_matrix(self):
         """
         """
         # migration matrix
-        self.migration_matrix = [0] * self.Configuration.number_of_demes
-        for i in range(self.Configuration.number_of_demes):
+        self.migration_matrix = [0] * self.configuration.number_of_demes
+        for i in range(self.configuration.number_of_demes):
             self.migration_matrix[i] = [
-                self.Configuration.migration_rate
-            ] * self.Configuration.number_of_demes
+                self.configuration.migration_rate
+            ] * self.configuration.number_of_demes
 
-        for i in range(self.Configuration.number_of_demes):
+        for i in range(self.configuration.number_of_demes):
             self.migration_matrix[i][i] = 1 - (
-                self.Configuration.migration_rate
-                * (self.Configuration.number_of_demes - 1)
+                self.configuration.migration_rate
+                * (self.configuration.number_of_demes - 1)
             )
-        
+
         return self.migration_matrix
-        
+
     ############################################################################
     ### Initialze Demes
 
-    def labels(self):
+    def set_labels(self):
         """
         """
         self.labels = []
@@ -215,44 +216,72 @@ class Simulator:
             self.labels.append(self.alphabet[i])
         return self.labels
 
-
     ############################################################################
     ### Initialize Sequnce Model
 
-    def startingSequences(self):
+    def set_starting_sequences(self):
         """
         """
-        
+
         # set orginating deme sequences
         self.start_seqs = []
         for i, deme_sequences in enumerate(self.demes):
-            seq = ''.join(self.rng.choice(self.nuc_alphabet,self.Configuration.sequence_length))
+            seq = "".join(
+                self.rng.choice(self.nuc_alphabet, self.configuration.sequence_length)
+            )
             self.start_seqs.append(seq)
-        return
-        
-    def startingDemeSequences(self):
+        return None
+
+    def set_starting_demes_sequences(self):
+
         """
         """
         # intalize class
         for i, deme_sequences in enumerate(self.demes):
-            self.demes[i] = [0] * self.Configuration.number_of_chromosomes
+            self.demes[i] = [0] * self.configuration.number_of_chromosomes
 
-            for k in range(self.Configuration.number_of_chromosomes):
+            for k in range(self.configuration.number_of_chromosomes):
                 deme_chromosome = Chromosome(self.start_seqs[i], self.labels[i])
                 self.demes[i][k] = deme_chromosome
 
-        return
+        return None
 
     ############################################################################
-    ### Mutate
+    ### Mutate sequence
 
-    def mutate(self):
+    def mutate_sequences(self):
+        """
+        """
+        for i, deme_sequences in enumerate(self.demes):
+            for j, chromosome in enumerate(deme_sequences):
+                which_sites_mut = self.rng.random(size = self.configuration.sequence_length)
+
+                which_sites_mut = which_sites_mut < self.configuration.mutation_rate
+                which_sites_mut = np.where(which_sites_mut)[0]
+                if any(which_sites_mut):
+                    for l, mutate_allele in enumerate(which_sites_mut):  
+                    # added find = j; [:j]+[j:]
+                        allele = chromosome.sequence[mutate_allele]
+                        # got rid of deep copy
+                        isAllele = self.nuc_alphabet.index(allele)
+                        possible_mutations = self.nuc_alphabet[:isAllele]
+                        possible_mutations += self.nuc_alphabet[isAllele + 1 :]
+                        mutation_allele = self.rng.choice(possible_mutations, size=1)[0]
+                        self.demes[i][j].sequence = (
+                            self.demes[i][j].sequence[:mutate_allele]
+                            + mutation_allele
+                            + self.demes[i][j].sequence[mutate_allele + 1 :]
+                        )
+        return None
+
+
+    def mutate_continuous(self):
         """
         """
         for i, deme_sequences in enumerate(self.demes):
             for j, chromosome in enumerate(self.deme_sequences):
-                which_sites_mut = self.rng.uniform([0,1,self.sequence_length])
-                
+                which_sites_mut = self.rng.uniform([0, 1, self.sequence_length])
+
                 which_sites_mut = which_sites_mut < self.mutation_rate
                 which_sites_mut = np.where(which_sites_mut)[0]
                 if any(which_sites_mut):
@@ -264,32 +293,31 @@ class Simulator:
                         isAllele = self.nuc_alphabet.find(allele)
                         possible_mutations = self.nuc_alphabet[:isAllele]
                         possible_mutations = +self.nuc_alphabet[j + 1 :]
-                        mutation_allele = self.rng.choice(possible_mutations,size=1)
+                        mutation_allele = self.rng.choice(possible_mutations, size=1)
                         demes[i][j].sequence = (
                             demes[i][j].sequence[:mutate_allele]
                             + mutation_allele
                             + demes[i][j].sequence[mutate_allele + 1 :]
                         )
-
     ############################################################################
     ### Simulate
 
-    def ancestralDemeSequences(self):
+#    def simulate_ancestral_deme_sequences(self):
+    def simulate_ancestral_deme_sequences(self):
         """
         """
-        
+
         self.nuc_alphabet = ["A", "T", "C", "G"]
-        
-        
-        self.sequence_files = [] #move to multple trial function
-        self.metadata_files = [] #move to multple trial function
-        
-        # Intialize properties #dynamic for multiple experiments 
-        self.startingSequences()
-        self.startingDemeSequences()
-        
+
+        self.sequence_files = []  # move to multple trial function
+        self.metadata_files = []  # move to multple trial function
+
+        # Intialize properties #dynamic for multiple experiments
+        self.set_starting_sequences()
+        self.set_starting_demes_sequences()
+
         # EXPERIMENT
-        for generation in range(self.Configuration.number_generations):
+        for generation in range(self.configuration.number_generations):
             self.generation = generation
             temp_demes = []
 
@@ -297,48 +325,56 @@ class Simulator:
                 temp_draws = []
                 # migration arrary
                 migration_array = self.migration_matrix[i]
-                for k in range(self.Configuration.number_of_chromosomes):
-                    sample_demes = range(self.Configuration.number_of_demes)
+                for k in range(self.configuration.number_of_chromosomes):
+                    sample_demes = range(self.configuration.number_of_demes)
 
-                    from_deme_draw = self.rng.choice(sample_demes, p=migration_array) #contact numpy 
-
-                    from_sequence_draw = self.rng.integers(self.Configuration.number_of_chromosomes)
+                    from_deme_draw = self.rng.choice(
+                        sample_demes, p=migration_array
+                    ) 
+                    
+                    from_sequence_draw = self.rng.integers(
+                        self.configuration.number_of_chromosomes
+                    )
 
                     temp_draws.append(self.demes[from_deme_draw][from_sequence_draw])
                 self.rng.shuffle(temp_draws)
                 temp_demes.append(temp_draws)
+            self.mutate_sequences()
 
             # update demes/pops with temp
             self.demes = temp_demes
 
-            self.writeSnapShots()
+            self.write_snap_shots()
 
-        return
-        
-        
+        return None
+
     ############################################################################
-    ### Write sequence traits to files 
+    ### Write sequence traits to files
+    # out = StringIO()
+    # and write out silimarly
+    # change write to as_....(fasta, csvtable,etc)
+#    def write_snap_shots(self):
+    def write_snap_shots(self):
+        """
+        """
+        # change to runtime*****************************
 
-    def writeSnapShots(self):
-        """
-        """
-        # change to runtime*****************************    
-        
-        #print("Generation:", self.generation)
-        if (self.generation in self.Configuration.snapshot_times) | (
-            self.generation == self.Configuration.number_generations - 1
+        # print("Generation:", self.generation)
+        if (self.generation in self.configuration.snapshot_times) | (
+            self.generation == self.configuration.number_generations - 1
         ):
             (sequence_file, metadata_file, self.Resolution) = self.write_sequence_data()
 
             self.sequence_files.append(sequence_file)
             self.metadata_files.append(metadata_file)
 
-        return
-        
+        return None
+
     def write_sequence_data(self):
         """
         """
 
+        # initialize array of strings to write
         csv_list = [",IDV,SUBPOP,ANC"]
         fasta_list = []
         for deme_count, deme in enumerate(self.demes):
@@ -349,10 +385,12 @@ class Simulator:
                     ">" + self.labels[deme_count] + ".chromsome." + str(chromose_count)
                 )
 
-                chromosome_count = self.labels[deme_count] + ".chromsome." + str(chromose_count)
+                chromosome_count = (
+                    self.labels[deme_count] + ".chromsome." + str(chromose_count)
+                )
 
                 ind_count_label = (
-                    self.labels[deme_count] + "|" + str(math.floor(chromose_count / 2))
+                    self.labels[deme_count] + "." + str(math.floor(chromose_count / 2))
                 )
                 # change to number ploidy
 
@@ -368,30 +406,29 @@ class Simulator:
 
                 fasta_list.append(sequence_bases)
 
-       
-        logging.info(json.dumps(self.Configuration.outfile_prefix))  # as same line term = ,
-        logging.info(json.dumps(self.generation)) 
-        
-        
+        logging.info(
+            json.dumps(self.configuration.outfile_prefix)
+        )  # as same line term = ,
+        logging.info(json.dumps(self.generation))
+
         # write deme data for analysis downstream
         # open file in write mode
-        self.metadata_filename = self.Configuration.outfile_prefix 
-        self.metadata_filename =+ "_" 
-        self.metadata_filename =+ str(self.generation) 
-        self.metadata_filename =+ ".csv"
+        self.metadata_filename = self.configuration.outfile_prefix
+        self.metadata_filename += "_"
+        self.metadata_filename += str(self.generation)
+        self.metadata_filename += ".csv"
 
         with open(self.metadata_filename, "w") as fp:
             for item in csv_list:
                 # write each item on a new line
-                fp.write("%s\n" % item)            
-            
+                fp.write("%s\n" % item)
 
         # Write deme sequences for analyis downstream
         # open file in write mode
-        self.sequence_filename = self.Configuration.outfile_prefix 
-        self.sequence_filename =+ "_" 
-        self.sequence_filename =+ str(self.generation) 
-        self.sequence_filename =+ ".fasta"
+        self.sequence_filename = self.configuration.outfile_prefix
+        self.sequence_filename += "_"
+        self.sequence_filename += str(self.generation)
+        self.sequence_filename += ".fasta"
         with open(self.sequence_filename, "w") as fp:
             for item in fasta_list:
                 # write each item on a new line
@@ -401,53 +438,47 @@ class Simulator:
 
         return (self.sequence_filename, self.metadata_filename, self.resolution)
 
-
-
-
-
-        
     ############################################################################
     ### Initialize Continuous Model
 
-    def startingContinuousTrait(self):
+    def set_starting_demes_continuous(self):
         """
         """
         #####
-        for i in range(self.Configuration.number_of_demes):
+        for i in range(self.configuration.number_of_demes):
             self.labels.append(self.alphabet[i])
             self.demes[0].append(
                 Continuous_trait_deme(
-                    self.Configuration.start_mean,
-                    self.Configuration.start_std,
+                    self.configuration.start_mean,
+                    self.configuration.start_std,
                     self.alphabet[i],
                 )
             )
 
-        return
+        return None
 
     ############################################################################
-    ## Simulate continuous traits 
+    ## Simulate continuous traits
 
-    def continuousTraitEvolution(self):
+    def simulate_deme_continuous_trait(self):
         """
         """
-        self.demes = [[]]  # * self.Configuration.number_of_demes
-        self.startingContinuousTrait()
+        self.demes = [[]]  # * self.configuration.number_of_demes
+        self.set_starting_demes_continuous()
 
         self.csv_header = ",generation,"
         self.csv_header += ",".join(self.labels)
 
-
-        self.continuous_data_list = [self.csv_header]  
+        self.continuous_data_list = [self.csv_header]
 
         # EXPERIMENT
-        for generation in range(self.Configuration.number_generations):
+        for generation in range(self.configuration.number_generations):
             self.generation = generation
             print("Generation:", generation)
-            temp_demes_mean = [0] * self.Configuration.number_of_demes
-            temp_demes_std = [0] * self.Configuration.number_of_demes
+            temp_demes_mean = [0] * self.configuration.number_of_demes
+            temp_demes_std = [0] * self.configuration.number_of_demes
 
-            temp_draws = [0.0] * self.Configuration.number_of_demes
+            temp_draws = [0.0] * self.configuration.number_of_demes
 
             demes_mean = []
             demes_std = []
@@ -461,7 +492,7 @@ class Simulator:
                 migration_array = self.migration_matrix[i]
 
                 number_draw = int(
-                    migration_array[i] * self.Configuration.number_of_chromosomes
+                    migration_array[i] * self.configuration.number_of_chromosomes
                 )
                 temp_draws[i] = self.rng.normal(
                     loc=deme_traits.mean, scale=deme_traits.std, size=number_draw
@@ -472,14 +503,12 @@ class Simulator:
                 temp_std = demes_std[:i] + demes_std[i + 1 :]
                 for j, meanj in enumerate(demes_mean[:i] + demes_mean[i + 1 :]):
                     number_draw = int(
-                        migration_array[j] * self.Configuration.number_of_chromosomes
+                        migration_array[j] * self.configuration.number_of_chromosomes
                     )
-                    
+
                     np.append(
                         temp_draws[i],
-                        self.rng.normal(
-                            loc=meanj, scale=temp_std[j], size=number_draw
-                        ),
+                        self.rng.normal(loc=meanj, scale=temp_std[j], size=number_draw),
                     )
 
                 temp_demes_mean[i] = round(np.mean(temp_draws[i]), 2)
@@ -489,7 +518,7 @@ class Simulator:
             demes_std = temp_demes_std
 
             self.demes.append([])
-            for i in range(self.Configuration.number_of_demes):
+            for i in range(self.configuration.number_of_demes):
                 mean = demes_mean[i]
                 std = demes_std[i]
                 label = self.alphabet[i]
@@ -498,41 +527,35 @@ class Simulator:
                     Continuous_trait_deme(mean, std, label)
                 )
 
-            self.continuous_data_list.append(str(generation) + "," + "".join(str(demes_mean))[1:-1])
+            self.continuous_data_list.append(
+                str(generation) + "," + "".join(str(demes_mean))[1:-1]
+            )
 
         self.write_continuous_data()
 
-        return 
-        
-
+        return None
 
     ############################################################################
     ## Write Continuous trait data to file
+    # out = StringIO()
+    # and write out silimarly
+    # change write to as_....(fasta, csvtable,etc)
 
     def write_continuous_data(self):
         """
         """
         # write deme data for analysis downstream
         # open file in write mode
-        
-        self.continuous_data_filename = self.Configuration.outfile_prefix + ".csv"
+
+        self.continuous_data_filename = self.configuration.outfile_prefix + ".csv"
         with open(self.continuous_data_filename, "w") as fp:
             for item in self.continuous_data_list:
                 # write each item on a new line
                 fp.write("%s\n" % item)
             print("Done", self.continuous_data_filename)
 
-        return 
+        return None
 
-
-           
     def log_analysis():
-        logging.info("Analyzing")#to check
-        return
-        
-        
-        
-        
-        
-        
-        
+        logging.info("Analyzing")  # to check
+        return None

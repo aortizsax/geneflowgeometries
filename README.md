@@ -9,28 +9,28 @@ GeneFlowGeometries runs under Python 3 (>3.8)
 You can install GeneFlowGeometries by running::
 
 ```bash
-$ gh repo clone aortizsax/geneflowgeometries
+gh repo clone aortizsax/geneflowgeometries
 ```
 
 ```bash
-$ cd geneflowgeometries
+cd geneflowgeometries
 ```
 
 ```bash
-$ conda create -n geneflowgeometries python=3.9
+conda create -n geneflowgeometries python=3.9
 ```
 
 
 ```bash
-$ conda activate geneflowgeometries
+conda activate geneflowgeometries
 ```
 
 ```bash
-$ pip install .
+pip install .
 ```
 
 ```bash
-$ geneflowgeometries -h
+geneflowgeometries -h
 ```
 
 ## Documentation

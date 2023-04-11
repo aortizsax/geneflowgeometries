@@ -51,11 +51,7 @@ setup(
     # MANIFEST.in: only used in source distribution packaging.
     # ``package_data``: only used in binary distribution packaging.
     package_data={
-        "": [
-            "*.txt",
-            "*.md",
-            "*.rst",
-        ],
+        "": ["*.txt", "*.md", "*.rst",],
         "geneflowgeometries": [
             # For files in this package's direct namespace
             # (e.g., "src/{normalized_project_name}/*.json")

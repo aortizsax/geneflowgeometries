@@ -21,24 +21,32 @@
 ## ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 ## WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 ## DISCLAIMED. IN NO EVENT SHALL ADRIAN ORTIZ-VELEZ OR JEET SUKUMARAN BE LIABLE
-## FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
-## DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
-## SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
-## CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
-## OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+## FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+## DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+## SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+## CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+## OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##
 ##############################################################################
-
+# mutate funciton not nnlog(n)
+# actully knml only for loo thourgh mutation sites
 
 # directive from last week get ancsequences to OOP
-# additionally continuous trait, argparse, 
+# additionally continuous trait,
+# argparse
+#   no more casting
+#   override config file
+#
 
 
-# my to do 
-# likely incorrect modularization of writing files(but close),
-# analysis OOP
-
+# my to do
+# modularization of writing files(close, have note),
+# analysis OOP similar to PDM class??
+# log files;
+#   can write and choose level
+#   need ';' terrminator and multilog handling
+#
 
 
 import os
@@ -60,13 +68,13 @@ from geneflowgeometries.config_parse.Config import Config
 from configparser import ConfigParser
 
 
-
 def main():
     args = sys.argv[1:]
     # setting the log level on the root logger must happen BEFORE any output
     logging_argparse = argparse.ArgumentParser(prog=__file__, add_help=False)
-    logging_argparse.add_argument('-l', '--log-level', default='WARNING',
-                                  help='set log level')
+    logging_argparse.add_argument(
+        "-l", "--log-level", default="WARNING", help="set log level"
+    )
     logging_args, _ = logging_argparse.parse_known_args(args)
 
     try:
@@ -76,33 +84,35 @@ def main():
         sys.exit(1)
 
     logger = logging.getLogger(__name__)
-    logger.info("Log level set: {}"
-                .format(logging.getLevelName(logger.getEffectiveLevel())))
+    logger.info(
+        "Log level set: {}".format(logging.getLevelName(logger.getEffectiveLevel()))
+    )
 
     # parse values from a configuration file if provided and use those as the
     # default values for the argparse arguments
     config_argparse = argparse.ArgumentParser(prog=__file__, add_help=False)
-    config_argparse.add_argument('-c', '--config-file',
-                                 help='path to configuration file')
+    config_argparse.add_argument(
+        "-c", "--config-file", help="path to configuration file"
+    )
     config_args, _ = config_argparse.parse_known_args(args)
 
     defaults = {
-        "simulate_sequences_or_continous":"sequences",
-        "geometry":"complete graph",
-        "number_of_chromosomes_per_deme":100,
-        "number_of_chromosomes_per_invdividual":2,
-        "number_of_demes":4,
-        "migration_rate":0.1,
-        "mutation_rate":0.0004,
-        "sequence_length":1000,
-        "simulation_time":2000,
-        "number_of_simulations":200,
-        "log_id":"log_DATE",
-        "output_prefix":"output",
-        "seed":12345,
-        "mean":0,
-        "standard_deviation":1,
-        }
+        "simulate_sequences_or_continous": "sequences",
+        "geometry": "complete graph",
+        "number_of_chromosomes_per_deme": 100,
+        "number_of_chromosomes_per_invdividual": 2,
+        "number_of_demes": 4,
+        "migration_rate": 0.1,
+        "mutation_rate": 0.0004,
+        "sequence_length": 1000,
+        "simulation_time": 2000,
+        "number_of_simulations": 200,
+        "log_id": "log_DATE",
+        "output_prefix": "output",
+        "seed": 12345,
+        "mean": 0,
+        "standard_deviation": 1,
+    }
 
     if config_args.config_file:
         logger.info("Loading configuration: {}".format(config_args.config_file))
@@ -115,23 +125,18 @@ def main():
             logger.error(str(err))
             sys.exit(1)
 
-        defaults.update(dict(config_parser.items('SIMULATOR')))
+        defaults.update(dict(config_parser.items("SIMULATOR")))
 
     # parse the program's main arguments using the dictionary of defaults and
     # the previous parsers as "parent' parsers
     parsers = [logging_argparse, config_argparse]
     main_parser = argparse.ArgumentParser(prog=__file__, parents=parsers)
     main_parser.set_defaults(**defaults)
-    main_parser.add_argument('-1', '--option1')
-    main_parser.add_argument('-2', '--option2')
 
-
- 
-    
     main_parser.add_argument(
         "-S",
         "--simulate-sequences-or-continous",
-        choices=["sequences","continuous"],
+        choices=["sequences", "continuous"],
         action="store",
         default="sequences",
         help="Choose to simulate sequences or continous variable [default=%(default)s].",
@@ -139,7 +144,7 @@ def main():
     main_parser.add_argument(
         "-G",
         "--geometry",
-        choices=["complete graph","chain graph","random connectivity?"],
+        choices=["complete graph", "chain graph", "random connectivity?"],
         action="store",
         help="Network/graph to simulate. [default=%(default)s].",
     )
@@ -153,12 +158,12 @@ def main():
     main_parser.add_argument(
         "-P",
         "--number-of-chromosomes-per-invdividual",
-        choices=range(1,5),
+        choices=range(1, 5),
         action="store",
         type=int,
         help="Number of ploidy by organism [default=%(default)s].",
     )
-    main_parser.add_argument( 
+    main_parser.add_argument(
         "-k",
         "--number-of-demes",
         action="store",
@@ -232,18 +237,27 @@ def main():
         action="store",
         help="Seed for reproducibilty [default=%(default)s].",
     )
-    
-    
 
     main_args = main_parser.parse_args(args)
-    
+
     # where did the value of each argument come from?
     logger.info("Seed: {}".format(main_args.seed))
-
-    logger.info("simulate_sequences_or_continous: {}".format(main_args.simulate_sequences_or_continous))
+    logger.info(
+        "simulate_sequences_or_continous: {}".format(
+            main_args.simulate_sequences_or_continous
+        )
+    )
     logger.info("geometry: {}".format(main_args.geometry))
-    logger.info("number_of_chromosomes_per_deme: {}".format(main_args.number_of_chromosomes_per_deme))
-    logger.info("number_of_chromosomes_per_invdividual: {}".format(main_args.number_of_chromosomes_per_invdividual))
+    logger.info(
+        "number_of_chromosomes_per_deme: {}".format(
+            main_args.number_of_chromosomes_per_deme
+        )
+    )
+    logger.info(
+        "number_of_chromosomes_per_invdividual: {}".format(
+            main_args.number_of_chromosomes_per_invdividual
+        )
+    )
     logger.info("number_of_demes: {}".format(main_args.number_of_demes))
     logger.info("migration_rate: {}".format(main_args.migration_rate))
     logger.info("mutation_rate: {}".format(main_args.mutation_rate))
@@ -256,35 +270,28 @@ def main():
     logger.info("standard_deviation: {}".format(main_args.standard_deviation))
     print("Hello, simulation begining")
 
+    #    if args.config:
+    #        configuration = read_config(args)
 
-
-
-
-#    if args.config:
-#        Configuration = read_config(args)
-
-#    #need override https://gist.github.com/gene1wood/9217725; args, unparsed = parser.parse_known_args()
-#    else:
-    Configuration = read_args(main_args)
-
+    #    #need override https://gist.github.com/gene1wood/9217725; args, unparsed = parser.parse_known_args()
+    #    else:
+    configuration = read_args(main_args)
 
     # inialize Simulator instance
-    simulator = Simulator(Configuration)
+    simulator = Simulator(configuration)
 
     # to check
     setup_logger()
     logging.info("Beginning")  # for check
 
-    if Configuration.trait == "sequences":
+    if configuration.trait == "sequences":
         # SIMULATE
-        simulator.ancestralDemeSequences()
-        
-        
-        
-        #analysis to OOP; be able to just pass simulator obj to Analysis(simulator)
+        simulator.simulate_ancestral_deme_sequences()
+
+        # analysis to OOP; be able to just pass simulator obj to Analysis(simulator)
         filenames_snapshot = (simulator.sequence_files, simulator.metadata_files)
         tag = simulator.resolution
-        
+
         # ANALYSIS
         for i, fastafiles in enumerate(filenames_snapshot[0]):
             filenames = [filenames_snapshot[0][i], filenames_snapshot[1][i]]
@@ -301,16 +308,13 @@ def main():
             analyze.by_deme_pairwise_fst(sequence_dataframe, data_matrix, tag)
 
             analyze.wright_fis(sequence_dataframe, data_matrix, tag)
-            
-            
-            
 
     else:
         # SIMULATE
-        simulator.continuousTraitEvolution()
-        
+        simulator.simulate_deme_continuous_trait()
+
         print(simulator.continuous_data_filename)
-        #pass to analysis OPP or something synomims to PDM 
+        # pass to analysis OPP or something synomims to PDM
 
 
 if __name__ == "__main__":
