@@ -62,7 +62,7 @@ from geneflowgeometries.calculate import analyze
 
 import logging
 from geneflowgeometries.log.multi_handlers_logger import setup_logger
-from geneflowgeometries.config_parse.parse import read_config, read_args
+from geneflowgeometries.config_parse.Config import read_config, read_args
 
 from geneflowgeometries.config_parse.Config import Config
 from configparser import ConfigParser
@@ -138,7 +138,6 @@ def main():
         "--simulate-sequences-or-continous",
         choices=["sequences", "continuous"],
         action="store",
-        default="sequences",
         help="Choose to simulate sequences or continous variable [default=%(default)s].",
     )
     main_parser.add_argument(
@@ -278,7 +277,7 @@ def main():
     configuration = read_args(main_args)
 
     # inialize Simulator instance
-    simulator = Simulator(configuration)
+    simulator = Simulator(configuration) #get rid of self.configuration...
 
     # to check
     setup_logger()
@@ -286,7 +285,7 @@ def main():
 
     if configuration.trait == "sequences":
         # SIMULATE
-        simulator.simulate_ancestral_deme_sequences()
+        simulator.simulate_multiple_trials_sequences()
 
         # analysis to OOP; be able to just pass simulator obj to Analysis(simulator)
         filenames_snapshot = (simulator.sequence_files, simulator.metadata_files)
@@ -311,9 +310,10 @@ def main():
 
     else:
         # SIMULATE
-        simulator.simulate_deme_continuous_trait()
+        simulator.simulate_multiple_trials_continuous()
 
-        print(simulator.continuous_data_filename)
+        print(simulator.continuous_trial_files)
+        simulator.plot_continuous()
         # pass to analysis OPP or something synomims to PDM
 
 

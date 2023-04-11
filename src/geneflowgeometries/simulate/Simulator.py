@@ -175,7 +175,6 @@ class Simulator:
         Returns
         -------
         """
-        print(configuration)
         self.configuration = configuration
         # intialize demes
         self.demes = [[]] * self.configuration.number_of_demes
@@ -299,18 +298,32 @@ class Simulator:
                             + mutation_allele
                             + demes[i][j].sequence[mutate_allele + 1 :]
                         )
+                        
+##    def set_analysis_files(self):?????????
     ############################################################################
     ### Simulate
+    
+    def simulate_multiple_trials_sequences(self):
+        """
+        """
+        #loop through simK number_trials
+        self.sequence_files = []  # move to multple trial function
+        self.metadata_files = []  # move to multple trial function
 
-#    def simulate_ancestral_deme_sequences(self):
+        for trial in range(self.configuration.number_simulations):
+            print("Trial/Simulation:",trial)
+            self.trial = trial
+            self.simulate_ancestral_deme_sequences()
+        
+        return None
+
     def simulate_ancestral_deme_sequences(self):
         """
         """
+        self.nuc_alphabet = ["A", "T", "C", "G"]### global with __nuc_alphabet__??
 
-        self.nuc_alphabet = ["A", "T", "C", "G"]
-
-        self.sequence_files = []  # move to multple trial function
-        self.metadata_files = []  # move to multple trial function
+        #self.sequence_files = []  # move to multple trial function
+        #self.metadata_files = []  # move to multple trial function
 
         # Intialize properties #dynamic for multiple experiments
         self.set_starting_sequences()
@@ -416,6 +429,8 @@ class Simulator:
         self.metadata_filename = self.configuration.outfile_prefix
         self.metadata_filename += "_"
         self.metadata_filename += str(self.generation)
+        self.metadata_filename += "_"
+        self.metadata_filename += str(self.trial)
         self.metadata_filename += ".csv"
 
         with open(self.metadata_filename, "w") as fp:
@@ -428,6 +443,8 @@ class Simulator:
         self.sequence_filename = self.configuration.outfile_prefix
         self.sequence_filename += "_"
         self.sequence_filename += str(self.generation)
+        self.sequence_filename += "_"
+        self.sequence_filename += str(self.trial)
         self.sequence_filename += ".fasta"
         with open(self.sequence_filename, "w") as fp:
             for item in fasta_list:
@@ -460,21 +477,49 @@ class Simulator:
     ############################################################################
     ## Simulate continuous traits
 
+    def simulate_multiple_trials_continuous(self):
+        """
+        """
+        self.csv_header = "generation,"
+        self.csv_header += ",".join(self.labels)
+        #loop through simK number_trials
+        self.continuous_trial_files = []  # move to multple trial function
+
+        for trial in range(self.configuration.number_simulations):
+            self.trial = trial
+            print("Trial/Simulation:",trial)
+            self.simulate_deme_continuous_trait()
+        
+        return None
+
+
     def simulate_deme_continuous_trait(self):
         """
         """
         self.demes = [[]]  # * self.configuration.number_of_demes
         self.set_starting_demes_continuous()
+        
+        self.continuous_mean_list = [self.csv_header]
+        self.continuous_std_list = [self.csv_header]
 
-        self.csv_header = ",generation,"
-        self.csv_header += ",".join(self.labels)
+        #set first row in csv
+        demes_mean = []
+        demes_std = []
+        for i, deme_traits in enumerate(self.demes[0]):
+            demes_mean.append(deme_traits.mean)
+            demes_std.append(deme_traits.std)
 
-        self.continuous_data_list = [self.csv_header]
+        self.continuous_mean_list.append(
+            str(-1) + "," + "".join(str(demes_mean))[1:-1]
+        )
+        self.continuous_std_list.append(
+            str(-1) + "," + "".join(str(demes_std))[1:-1]
+        )
+        #end set first row
 
         # EXPERIMENT
         for generation in range(self.configuration.number_generations):
-            self.generation = generation
-            print("Generation:", generation)
+            self.generation = generation 
             temp_demes_mean = [0] * self.configuration.number_of_demes
             temp_demes_std = [0] * self.configuration.number_of_demes
 
@@ -527,8 +572,11 @@ class Simulator:
                     Continuous_trait_deme(mean, std, label)
                 )
 
-            self.continuous_data_list.append(
+            self.continuous_mean_list.append(
                 str(generation) + "," + "".join(str(demes_mean))[1:-1]
+            )
+            self.continuous_std_list.append(
+                str(generation) + "," + "".join(str(demes_std))[1:-1]
             )
 
         self.write_continuous_data()
@@ -547,13 +595,35 @@ class Simulator:
         # write deme data for analysis downstream
         # open file in write mode
 
-        self.continuous_data_filename = self.configuration.outfile_prefix + ".csv"
-        with open(self.continuous_data_filename, "w") as fp:
-            for item in self.continuous_data_list:
+        self.continuous_mean_filename = self.configuration.outfile_prefix + "_" + str(self.trial) + "mean.csv"
+        self.continuous_trial_files.append(self.continuous_mean_filename)
+        with open(self.continuous_mean_filename, "w") as fp:
+            for item in self.continuous_mean_list:
                 # write each item on a new line
                 fp.write("%s\n" % item)
-            print("Done", self.continuous_data_filename)
 
+        self.continuous_std_filename = self.configuration.outfile_prefix + "_" + str(self.trial) + "std.csv"
+        self.continuous_trial_files.append(self.continuous_std_filename)
+        with open(self.continuous_std_filename, "w") as fp:
+            for item in self.continuous_std_list:
+                # write each item on a new line
+                fp.write("%s\n" % item)
+
+
+        return None
+        
+    def plot_continuous(self):
+        """
+        """
+        continuous_dict = {}
+        for i, filename in enumerate(self.continuous_trial_files[::2]):
+            print(filename)
+            means = pd.read_csv(filename)
+            print(means.iloc[-1].tolist()[1:])
+            means.iloc[-1].plot()
+            continuous_dict[i] = means.iloc[-1].tolist()[1:]
+        
+    
         return None
 
     def log_analysis():
