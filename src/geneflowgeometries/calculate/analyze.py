@@ -62,35 +62,35 @@ def parse(filenames):
     return (sequence_dataframe, data_matrix)
 
 
-def nei_fst(sequences, metadata, deme_identifier):
-    populationgeneticstats.nei_fst(sequences, metadata, deme_identifier)
+def nei_fst(sequences, metadata, deme_identifier,geo):
+    populationgeneticstats.nei_fst(sequences, metadata, deme_identifier,geo)
     logging.info("Analyzing nei fst for gen")
     return None
 
 
-def by_deme_pairwise_fst(sequences, metadata, deme_identifier):
-    populationgeneticstats.by_deme_pairwise_fst(sequences, metadata, deme_identifier)
+def by_deme_pairwise_fst(sequences, metadata, deme_identifier,geo):
+    populationgeneticstats.by_deme_pairwise_fst(sequences, metadata, deme_identifier,geo)
 
     return None
 
 
 def weir_cockerman_fst():
-    populationgeneticstats.weir_cockerman_fst(sequences, metadata, deme_identifier)
+    populationgeneticstats.weir_cockerman_fst(sequences, metadata, deme_identifier,geo)
 
     return None
 
 
-def weir_goudet_population_specific_fst(sequences, metadata, deme_identifier):
+def weir_goudet_population_specific_fst(sequences, metadata, deme_identifier,geo):
     populationgeneticstats.weir_goudet_population_specific_fst(
-        sequences, metadata, deme_identifier
+        sequences, metadata, deme_identifier,geo
     )
 
     return None
     #
 
 
-def wright_fis(sequences, metadata, deme_identifier):
-    populationgeneticstats.wright_fis(sequences, metadata, deme_identifier)
+def wright_fis(sequences, metadata, deme_identifier,geo):
+    populationgeneticstats.wright_fis(sequences, metadata, deme_identifier,geo)
 
     return None
 

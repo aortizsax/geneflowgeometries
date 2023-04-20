@@ -298,15 +298,15 @@ def main():
 
             (sequence_dataframe, data_matrix) = analyze.parse(filenames)
 
-            analyze.nei_fst(sequence_dataframe, data_matrix, tag)
+            analyze.nei_fst(sequence_dataframe, data_matrix, tag, configuration.geometry)
 
             analyze.weir_goudet_population_specific_fst(
-                sequence_dataframe, data_matrix, tag
+                sequence_dataframe, data_matrix, tag, configuration.geometry
             )
 
-            analyze.by_deme_pairwise_fst(sequence_dataframe, data_matrix, tag)
+            analyze.by_deme_pairwise_fst(sequence_dataframe, data_matrix, tag, configuration.geometry)
 
-            analyze.wright_fis(sequence_dataframe, data_matrix, tag)
+            analyze.wright_fis(sequence_dataframe, data_matrix, tag,configuration.geometry)
 
     else:
         # SIMULATE

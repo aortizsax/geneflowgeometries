@@ -189,20 +189,41 @@ class Simulator:
     def calculate_migration_matrix(self):
         """
         """
-        # migration matrix
-        self.migration_matrix = [0] * self.configuration.number_of_demes
-        for i in range(self.configuration.number_of_demes):
-            self.migration_matrix[i] = [
-                self.configuration.migration_rate
-            ] * self.configuration.number_of_demes
+        # migration matrix complete graph
+        if self.configuration.geometry == 'complete graph':
+            self.migration_matrix = [0] * self.configuration.number_of_demes
+            for i in range(self.configuration.number_of_demes):
+                self.migration_matrix[i] = [
+                    self.configuration.migration_rate
+                ] * self.configuration.number_of_demes
 
-        for i in range(self.configuration.number_of_demes):
-            self.migration_matrix[i][i] = 1 - (
-                self.configuration.migration_rate
-                * (self.configuration.number_of_demes - 1)
-            )
+            for i in range(self.configuration.number_of_demes):
+                self.migration_matrix[i][i] = 1 - (
+                    self.configuration.migration_rate
+                    * (self.configuration.number_of_demes - 1)
+                )
+        elif self.configuration.geometry == 'chain graph':
+            # migration matrix chain graph
+            self.migration_matrix = [0] * self.configuration.number_of_demes
+            for i in range(self.configuration.number_of_demes):
+                self.migration_matrix[i] = [0] * self.configuration.number_of_demes
 
-        return self.migration_matrix
+            for i in range(self.configuration.number_of_demes):
+                if i == 0:
+                    self.migration_matrix[i][0] = 1 - self.configuration.migration_rate
+                    self.migration_matrix[i][1] = self.configuration.migration_rate
+                    
+                elif i == len(self.labels):
+                    self.migration_matrix[i][i-1] = self.configuration.migration_rate
+                    self.migration_matrix[i][i] = 1 - 2 * (self.configuration.migration_rate)
+                    self.migration_matrix[i][i+1] = self.configuration.migration_rate
+                    
+                else:
+                    self.migration_matrix[i][-2] = self.configuration.migration_rate
+                    self.migration_matrix[i][-1] = 1 -self.configuration.migration_rate
+                
+    
+        return None
 
     ############################################################################
     ### Initialze Demes
@@ -215,7 +236,7 @@ class Simulator:
             self.labels.append(self.alphabet[i])
         return self.labels
 
-    ############################################################################
+    ############################################################################ 
     ### Initialize Sequnce Model
 
     def set_starting_sequences(self):
@@ -226,7 +247,7 @@ class Simulator:
         self.start_seqs = []
         for i, deme_sequences in enumerate(self.demes):
             seq = "".join(
-                self.rng.choice(self.nuc_alphabet, self.configuration.sequence_length)
+                self.rng.choice(self.nuc_alphabet, self.configuration.sequence_length) 
             )
             self.start_seqs.append(seq)
         return None
@@ -240,12 +261,12 @@ class Simulator:
             self.demes[i] = [0] * self.configuration.number_of_chromosomes
 
             for k in range(self.configuration.number_of_chromosomes):
-                deme_chromosome = Chromosome(self.start_seqs[i], self.labels[i])
+                deme_chromosome = Chromosome(self.start_seqs[i], self.labels[i]) 
                 self.demes[i][k] = deme_chromosome
 
         return None
 
-    ############################################################################
+    ############################################################################ 
     ### Mutate sequence
 
     def mutate_sequences(self):
@@ -335,6 +356,7 @@ class Simulator:
             temp_demes = []
 
             for i, temp_sequences in enumerate(self.demes):
+                self.current_deme_i = i
                 temp_draws = []
                 # migration arrary
                 migration_array = self.migration_matrix[i]
@@ -490,8 +512,30 @@ class Simulator:
             print("Trial/Simulation:",trial)
             self.simulate_deme_continuous_trait()
         
-        return None
+        return None        
+        
+    def set_migration_network_demes(self):
+     
+        if self.configuration.geometry == 'complete graph':
 
+            self.migration_network = self.demes_mean[:self.current_deme_i] + self.demes_mean[self.current_deme_i + 1 :]
+       
+        else: #chain grapsh
+
+            if self.current_deme_i == 0: 
+                #boundary case
+                self.migration_network = [demes_mean[1]]
+            
+            elif self.current_deme_i == len(self.labels): 
+                #boundary case
+                self.migration_network = [demes_mean[-2]]
+                
+            else: 
+                # chain case
+                self.migration_network = [demes_mean[self.current_deme_i-1],demes_mean[(self.current_deme_i + 1)%len(demes_mean)]]
+            
+        
+        return None
 
     def simulate_deme_continuous_trait(self):
         """
@@ -520,19 +564,21 @@ class Simulator:
         # EXPERIMENT
         for generation in range(self.configuration.number_generations):
             self.generation = generation 
+
+            self.demes_mean = []
+            self.demes_std = []
+            for i, deme_traits in enumerate(self.demes[generation]):
+                self.demes_mean.append(deme_traits.mean)
+                self.demes_std.append(deme_traits.std)
+
+
             temp_demes_mean = [0] * self.configuration.number_of_demes
             temp_demes_std = [0] * self.configuration.number_of_demes
 
             temp_draws = [0.0] * self.configuration.number_of_demes
 
-            demes_mean = []
-            demes_std = []
-
             for i, deme_traits in enumerate(self.demes[generation]):
-                demes_mean.append(deme_traits.mean)
-                demes_std.append(deme_traits.std)
-
-            for i, deme_traits in enumerate(self.demes[generation]):
+                self.current_deme_i = i
                 # migration arrary
                 migration_array = self.migration_matrix[i]
 
@@ -546,7 +592,10 @@ class Simulator:
                 migration_array = migration_array[:i] + migration_array[i + 1 :]
 
                 temp_std = demes_std[:i] + demes_std[i + 1 :]
-                for j, meanj in enumerate(demes_mean[:i] + demes_mean[i + 1 :]):
+                
+                self.set_migration_network_demes()
+                for j, meanj in enumerate(self.migration_network):
+                #for j, meanj in enumerate(demes_mean[:i] + demes_mean[i + 1 :]):
                     number_draw = int(
                         migration_array[j] * self.configuration.number_of_chromosomes
                     )
@@ -559,13 +608,13 @@ class Simulator:
                 temp_demes_mean[i] = round(np.mean(temp_draws[i]), 2)
                 temp_demes_std[i] = round(np.std(temp_draws[i]), 2)
 
-            demes_mean = temp_demes_mean
-            demes_std = temp_demes_std
+            self.demes_mean = temp_demes_mean
+            self.demes_std = temp_demes_std
 
             self.demes.append([])
             for i in range(self.configuration.number_of_demes):
-                mean = demes_mean[i]
-                std = demes_std[i]
+                mean = self.demes_mean[i]
+                std = self.demes_std[i]
                 label = self.alphabet[i]
 
                 self.demes[generation + 1].append(
@@ -573,15 +622,37 @@ class Simulator:
                 )
 
             self.continuous_mean_list.append(
-                str(generation) + "," + "".join(str(demes_mean))[1:-1]
+                str(generation) + "," + "".join(str(self.demes_mean))[1:-1]
             )
             self.continuous_std_list.append(
-                str(generation) + "," + "".join(str(demes_std))[1:-1]
+                str(generation) + "," + "".join(str(self.demes_std))[1:-1]
             )
 
         self.write_continuous_data()
 
         return None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     ############################################################################
     ## Write Continuous trait data to file
@@ -617,38 +688,43 @@ class Simulator:
         Clean up and format plots 
         """
         continuous_dict = {}
+        continuous_mean_difference_dict = {}
         continuous_mean_difference_list = []
         for i, filename in enumerate(self.continuous_trial_files[::2]): 
             means = pd.read_csv(filename)
+                  
             
-            print(means.iloc[-1].tolist()[1:])
             pairwise_difference_row = []
             for ii, meani in enumerate(means.iloc[-1].tolist()[1:]):
                 for j, meanj in enumerate(means.iloc[-1].tolist()[1:]):
                     if ii != j:            
                         pairwise_difference_row.append(abs(meani-meanj)) 
-            print(pairwise_difference_row)
-            continuous_dict[i] = pairwise_difference_row
+            
+            continuous_mean_difference_dict[i] = pairwise_difference_row
+           
             for difference in pairwise_difference_row:
                 continuous_mean_difference_list.append(difference)
-            
-            print(continuous_dict)
-        #df = pd.DataFrame(continuous_dict)
+       
+        #df = pd.DataFrame(continuous_mean_difference_dict)
         #print(df)
         #df.plot(kind='hist')
         #df.hist()
         #plt.show()
+        print(self.configuration.outfile_prefix + "_abs.png")
+        abs_pairwise_difference_plot_filename = self.configuration.outfile_prefix + "_abs.png"
         plt.hist(continuous_mean_difference_list, bins="auto")
-        plt.xlabel("Change in mean from first (0th) and last cell (8th)")
+        plt.xlabel("Change in mean by deme")
         plt.ylabel("Count")
+        #plt.savefig(abs_pairwise_difference_plot_filename,'png')
         plt.show()
         
-        
+        sqr_pairwise_difference_plot_filename = self.configuration.outfile_prefix + "_sqr.png"
         continuous_mean_square_difference_list = np.square(continuous_mean_difference_list)
         plt.hist(continuous_mean_square_difference_list, bins="auto")
-        plt.xlabel("Change in mean from first (0th) and last cell (8th)")
+        plt.xlabel("Square change in mean")
         plt.ylabel("Count")
         plt.show()
+        #plt.savefig(sqr_pairwise_difference_plot_filename,'png')
         
     
         return None
@@ -656,3 +732,5 @@ class Simulator:
     def log_analysis():
         logging.info("Analyzing")  # to check
         return None
+        
+        
