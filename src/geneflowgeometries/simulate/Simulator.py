@@ -690,6 +690,7 @@ class Simulator:
         """
         Clean up and format plots 
         """
+        alpha = 0.5
         continuous_dict = {}
         continuous_mean_difference_dict = {}
         continuous_mean_difference_list = []
@@ -697,29 +698,43 @@ class Simulator:
         means_dict = {}
         for i, filename in enumerate(self.continuous_trial_files[::2]): 
             means = pd.read_csv(filename)
-            print(filename[:-4])
-            means_dict[filename] = []
+            print(filename[:-8])
+            means_dict[filename[:-8]] = []
             pairwise_difference_row = []
             for ii, meani in enumerate(means.iloc[-1].tolist()[1:]):
                 print('mean',ii,meani)
-                means_dict[filename].append(meani)
+                means_dict[filename[:-8]].append(meani)
         
         for i, filename in enumerate(self.continuous_trial_files[1::2]): 
             std = pd.read_csv(filename)
             print(filename[:-7])
+            
+            timestamp_means = means_dict[filename[:-7]]
             cross_entropy_row = []
             for ii, stdi in enumerate(std.iloc[-1].tolist()[1:]):
                 print(stdi)
                 shannon_index = 0.5 
                 log_factor = ((2 * np.pi)**0.5) * ( stdi ** 2)
                 shannon_index += np.log(log_factor) #log2piexp()std^2
-                print(shannon_index)
+                print('H',shannon_index)
                 for j, stdj in enumerate(std.iloc[-1].tolist()[1:]):
-                    if ii != j:          
-                        cross_entropy = stdi-stdj
+                    if ii < j:   
+                    #if ii > j:     
+                        print(stdi,stdj)
+                        meani = timestamp_means[ii]
+                        meanj = timestamp_means[j]
+                        print(meani,meanj)  
+                        varience_star_h = stdj**2 
+                        varience_star_h += ((alpha - 1) * stdi**2)
+                        factora = np.log(2*np.pi*stdj**2)
+                        factorb = 1 / (1 - 0.99) * np.log(stdj**2/varience_star_h)
+                        factorc = ((meani- meanj) **2)/(varience_star_h)
+                        cross_entropy = 0.5 * (factora + factorb + factorc)
+                        
+                        print('h_alpha(f_1,f_2)',cross_entropy)
+                        
                         cross_entropy_row.append(cross_entropy)
-                        print('Cross Entropy',cross_entropy) 
-   
+                        
         return None
             
 
