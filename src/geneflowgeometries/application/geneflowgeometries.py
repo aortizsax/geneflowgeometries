@@ -29,18 +29,21 @@
 ## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##
 ##############################################################################
-# mutate funciton not nnlog(n)
-# actully knml only for loo thourgh mutation sites
+#add input map capabilities ???????????????????????????????
 
-# directive from last week get ancsequences to OOP
-# additionally continuous trait,
-# argparse
-#   no more casting
-#   override config file
-#
+#added geos and visualizations
 
 
 # my to do
+    #add networkx color edges https://networkx.org/documentation/stable/auto_examples/drawing/plot_directed.html#sphx-glr-auto-examples-drawing-plot-directed-py
+#networkx multi graph for 
+    # mig 
+    # fst 
+    # ...
+    
+# differential cross entrpy and diff entropy
+    
+# gaussian 
 # modularization of writing files(close, have note),
 # analysis OOP similar to PDM class??
 # log files;
@@ -314,6 +317,7 @@ def main():
 
         print(simulator.continuous_trial_files)
         simulator.plot_continuous()
+        simulator.plot_continuous_entropy()
         # pass to analysis OPP or something synomims to PDM
 
 

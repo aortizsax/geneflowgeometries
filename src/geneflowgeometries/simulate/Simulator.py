@@ -213,16 +213,16 @@ class Simulator:
                     self.migration_matrix[i][0] = 1 - self.configuration.migration_rate
                     self.migration_matrix[i][1] = self.configuration.migration_rate
                     
-                elif i == len(self.labels):
+                elif i == (len(self.labels)-1):
+                    self.migration_matrix[i][-2] = self.configuration.migration_rate
+                    self.migration_matrix[i][-1] = 1 -self.configuration.migration_rate
+                else:
                     self.migration_matrix[i][i-1] = self.configuration.migration_rate
                     self.migration_matrix[i][i] = 1 - 2 * (self.configuration.migration_rate)
                     self.migration_matrix[i][i+1] = self.configuration.migration_rate
                     
-                else:
-                    self.migration_matrix[i][-2] = self.configuration.migration_rate
-                    self.migration_matrix[i][-1] = 1 -self.configuration.migration_rate
                 
-    
+
         return None
 
     ############################################################################
@@ -523,16 +523,17 @@ class Simulator:
         else: #chain grapsh
 
             if self.current_deme_i == 0: 
-                #boundary case
-                self.migration_network = [demes_mean[1]]
+                                #boundary case
+                self.migration_network = [self.demes_mean[1]]
             
-            elif self.current_deme_i == len(self.labels): 
-                #boundary case
-                self.migration_network = [demes_mean[-2]]
+            elif self.current_deme_i == (len(self.demes_mean)-1): 
+                                #boundary case
+                self.migration_network = [self.demes_mean[-2]]
                 
             else: 
+
                 # chain case
-                self.migration_network = [demes_mean[self.current_deme_i-1],demes_mean[(self.current_deme_i + 1)%len(demes_mean)]]
+                self.migration_network = [self.demes_mean[self.current_deme_i-1],self.demes_mean[(self.current_deme_i + 1)]]
             
         
         return None
@@ -594,6 +595,7 @@ class Simulator:
                 temp_std = demes_std[:i] + demes_std[i + 1 :]
                 
                 self.set_migration_network_demes()
+                
                 for j, meanj in enumerate(self.migration_network):
                 #for j, meanj in enumerate(demes_mean[:i] + demes_mean[i + 1 :]):
                     number_draw = int(
@@ -682,6 +684,45 @@ class Simulator:
 
 
         return None
+
+#    def calc_continuous_entropy(self):
+    def plot_continuous_entropy(self):
+        """
+        Clean up and format plots 
+        """
+        continuous_dict = {}
+        continuous_mean_difference_dict = {}
+        continuous_mean_difference_list = []
+        
+        means_dict = {}
+        for i, filename in enumerate(self.continuous_trial_files[::2]): 
+            means = pd.read_csv(filename)
+            print(filename[:-4])
+            means_dict[filename] = []
+            pairwise_difference_row = []
+            for ii, meani in enumerate(means.iloc[-1].tolist()[1:]):
+                print('mean',ii,meani)
+                means_dict[filename].append(meani)
+        
+        for i, filename in enumerate(self.continuous_trial_files[1::2]): 
+            std = pd.read_csv(filename)
+            print(filename[:-7])
+            cross_entropy_row = []
+            for ii, stdi in enumerate(std.iloc[-1].tolist()[1:]):
+                print(stdi)
+                shannon_index = 0.5 
+                log_factor = ((2 * np.pi)**0.5) * ( stdi ** 2)
+                shannon_index += np.log(log_factor) #log2piexp()std^2
+                print(shannon_index)
+                for j, stdj in enumerate(std.iloc[-1].tolist()[1:]):
+                    if ii != j:          
+                        cross_entropy = stdi-stdj
+                        cross_entropy_row.append(cross_entropy)
+                        print('Cross Entropy',cross_entropy) 
+   
+        return None
+            
+
         
     def plot_continuous(self):
         """
@@ -715,16 +756,16 @@ class Simulator:
         plt.hist(continuous_mean_difference_list, bins="auto")
         plt.xlabel("Change in mean by deme")
         plt.ylabel("Count")
-        #plt.savefig(abs_pairwise_difference_plot_filename,'png')
-        plt.show()
+        plt.savefig(abs_pairwise_difference_plot_filename,dpi=300,format='png')
+        #plt.show()
         
         sqr_pairwise_difference_plot_filename = self.configuration.outfile_prefix + "_sqr.png"
         continuous_mean_square_difference_list = np.square(continuous_mean_difference_list)
         plt.hist(continuous_mean_square_difference_list, bins="auto")
         plt.xlabel("Square change in mean")
         plt.ylabel("Count")
-        plt.show()
-        #plt.savefig(sqr_pairwise_difference_plot_filename,'png')
+        #plt.show()
+        plt.savefig(sqr_pairwise_difference_plot_filename,dpi=300,format='png')
         
     
         return None
