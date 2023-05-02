@@ -106,6 +106,7 @@ def main():
         "number_of_chromosomes_per_invdividual": 2,
         "number_of_demes": 4,
         "migration_rate": 0.1,
+        "migration_directionality_ratio": 1, 
         "mutation_rate": 0.0004,
         "sequence_length": 1000,
         "simulation_time": 2000,
@@ -178,6 +179,13 @@ def main():
         action="store",
         type=float,
         help="Migration rate across demes. Max = 1/k, where k is number of demes [default=%(default)s].",
+    )
+    main_parser.add_argument(
+        "-R",
+        "--migration-directionality-ratio",
+        action="store",
+        type=float,
+        help="Migration rate ratio to set directionality across demes. R=1;a->b===b->a::R=0.5;(a->b)===(b->a) [default=%(default)s].",
     )
     main_parser.add_argument(
         "-mut",
@@ -302,14 +310,15 @@ def main():
             (sequence_dataframe, data_matrix) = analyze.parse(filenames)
 
             analyze.nei_fst(sequence_dataframe, data_matrix, tag, configuration.geometry)
+            analyze.information_theroy_pipeline(sequence_dataframe, data_matrix, tag, configuration.geometry)
 
-            analyze.weir_goudet_population_specific_fst(
-                sequence_dataframe, data_matrix, tag, configuration.geometry
-            )
+            #analyze.weir_goudet_population_specific_fst(
+            #    sequence_dataframe, data_matrix, tag, configuration.geometry
+            #)
 
-            analyze.by_deme_pairwise_fst(sequence_dataframe, data_matrix, tag, configuration.geometry)
+            #analyze.by_deme_pairwise_fst(sequence_dataframe, data_matrix, tag, configuration.geometry)
 
-            analyze.wright_fis(sequence_dataframe, data_matrix, tag,configuration.geometry)
+            #analyze.wright_fis(sequence_dataframe, data_matrix, tag,configuration.geometry)
 
     else:
         # SIMULATE

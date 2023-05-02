@@ -61,6 +61,7 @@ class Config:
         ]
         self.number_of_demes = config_dict["simulator"]["number_of_demes"]
         self.migration_rate = config_dict["simulator"]["migration_rate"]
+        self.migration_directionality_ratio = config_dict["simulator"]["migration_directionality_ratio"]
         self.restriction_rate = 1 - self.migration_rate
         self.number_generations = config_dict["simulator"]["simulation_time"]
         self.number_simulations = config_dict["simulator"]["number_of_simulations"]
@@ -183,7 +184,8 @@ def read_args(args):
     except InvalidMigrationRateException:
         print("Exception occurred: Invalid migration rate")
         raise SystemExit(1)
-
+        
+    migration_directionality_ratio = args.migration_directionality_ratio
     mutation_rate = args.mutation_rate
     sequence_length = args.sequence_length
     simT = args.simulation_time
@@ -216,6 +218,7 @@ def read_args(args):
             "number_of_chromosomes_per_invdividual": number_of_ploidy,
             "number_of_demes": number_of_demes,
             "migration_rate": migration_rate,
+            "migration_directionality_ratio":migration_directionality_ratio,
             "mutation_rate": mutation_rate,
             "sequence_length": sequence_length,
             "mean": start_mean,

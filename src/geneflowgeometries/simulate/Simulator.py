@@ -189,40 +189,74 @@ class Simulator:
     def calculate_migration_matrix(self):
         """
         """
-        # migration matrix complete graph
-        if self.configuration.geometry == 'complete graph':
-            self.migration_matrix = [0] * self.configuration.number_of_demes
-            for i in range(self.configuration.number_of_demes):
-                self.migration_matrix[i] = [
-                    self.configuration.migration_rate
-                ] * self.configuration.number_of_demes
+        if self.configuration.migration_directionality_ratio == 1:
+            # migration matrix complete graph
+            if self.configuration.geometry == 'complete graph':
+                self.migration_matrix = [0] * self.configuration.number_of_demes
+                for i in range(self.configuration.number_of_demes): #setupper and lower triangle
+                    self.migration_matrix[i] = [
+                        self.configuration.migration_rate
+                    ] * self.configuration.number_of_demes
 
-            for i in range(self.configuration.number_of_demes):
-                self.migration_matrix[i][i] = 1 - (
-                    self.configuration.migration_rate
-                    * (self.configuration.number_of_demes - 1)
-                )
-        elif self.configuration.geometry == 'chain graph':
-            # migration matrix chain graph
-            self.migration_matrix = [0] * self.configuration.number_of_demes
-            for i in range(self.configuration.number_of_demes):
-                self.migration_matrix[i] = [0] * self.configuration.number_of_demes
+                for i in range(self.configuration.number_of_demes): #set diagonals
+                    self.migration_matrix[i][i] = 1 - (
+                        self.configuration.migration_rate
+                        * (self.configuration.number_of_demes - 1)
+                    )
+            elif self.configuration.geometry == 'chain graph':
+                # migration matrix chain graph
+                self.migration_matrix = [0] * self.configuration.number_of_demes
+                for i in range(self.configuration.number_of_demes):
+                    self.migration_matrix[i] = [0] * self.configuration.number_of_demes
 
-            for i in range(self.configuration.number_of_demes):
-                if i == 0:
-                    self.migration_matrix[i][0] = 1 - self.configuration.migration_rate
-                    self.migration_matrix[i][1] = self.configuration.migration_rate
-                    
-                elif i == (len(self.labels)-1):
-                    self.migration_matrix[i][-2] = self.configuration.migration_rate
-                    self.migration_matrix[i][-1] = 1 -self.configuration.migration_rate
-                else:
-                    self.migration_matrix[i][i-1] = self.configuration.migration_rate
-                    self.migration_matrix[i][i] = 1 - 2 * (self.configuration.migration_rate)
-                    self.migration_matrix[i][i+1] = self.configuration.migration_rate
-                    
+                for i in range(self.configuration.number_of_demes):
+                    if i == 0:
+                        self.migration_matrix[i][0] = 1 - self.configuration.migration_rate
+                        self.migration_matrix[i][1] = self.configuration.migration_rate
+                        
+                    elif i == (len(self.labels)-1):
+                        self.migration_matrix[i][-2] = self.configuration.migration_rate
+                        self.migration_matrix[i][-1] = 1 -self.configuration.migration_rate
+                    else:
+                        self.migration_matrix[i][i-1] = self.configuration.migration_rate
+                        self.migration_matrix[i][i] = 1 - 2 * (self.configuration.migration_rate)
+                        self.migration_matrix[i][i+1] = self.configuration.migration_rate
+        else:
+            out_mig_ratio = self.configuration.migration_directionality_ratio
+            in_mig_ratio = 1 / self.configuration.migration_directionality_ratio 
+            # migration matrix complete graph
+            if self.configuration.geometry == 'complete graph':
+                self.migration_matrix = [0] * self.configuration.number_of_demes
+                for i in range(self.configuration.number_of_demes): #setupper and lower triangle
+                    self.migration_matrix[i] = [
+                        self.configuration.migration_rate
+                    ] * self.configuration.number_of_demes
+
+                for i in range(self.configuration.number_of_demes): #set diagonals
+                    self.migration_matrix[i][i] = 1 - (
+                        self.configuration.migration_rate
+                        * (self.configuration.number_of_demes - 1)
+                    )
+            elif self.configuration.geometry == 'chain graph':
+                # migration matrix chain graph
+                self.migration_matrix = [0] * self.configuration.number_of_demes
+                for i in range(self.configuration.number_of_demes):
+                    self.migration_matrix[i] = [0] * self.configuration.number_of_demes
+
+                for i in range(self.configuration.number_of_demes):
+                    if i == 0:
+                        self.migration_matrix[i][0] = 1 - self.configuration.migration_rate  
+                        self.migration_matrix[i][1] = self.configuration.migration_rate 
+                        
+                    elif i == (len(self.labels)-1):
+                        self.migration_matrix[i][-2] = self.configuration.migration_rate * out_mig_ratio
+                        self.migration_matrix[i][-1] = 1 -self.configuration.migration_rate * out_mig_ratio
+                    else:
+                        self.migration_matrix[i][i-1] = self.configuration.migration_rate * out_mig_ratio
+                        self.migration_matrix[i][i] = 1 - (1+out_mig_ratio) * (self.configuration.migration_rate)
+                        self.migration_matrix[i][i+1] = self.configuration.migration_rate 
                 
-
+        print(self.migration_matrix)
         return None
 
     ############################################################################

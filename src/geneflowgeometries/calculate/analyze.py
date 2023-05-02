@@ -39,7 +39,7 @@
 # Libraries
 # import modules front end parser
 from nyemtaay.parse.parser import read_fasta_files, read_metadata, to_dataframe
-from nyemtaay.calculate import populationgeneticstats
+from nyemtaay.calculate import populationgeneticstats, informationtheory
 from nyemtaay.mathlib import sterling
 from nyemtaay.tests.nuetrality import tajimas_d
 import logging
@@ -92,6 +92,27 @@ def weir_goudet_population_specific_fst(sequences, metadata, deme_identifier,geo
 def wright_fis(sequences, metadata, deme_identifier,geo):
     populationgeneticstats.wright_fis(sequences, metadata, deme_identifier,geo)
 
+    return None
+    
+def information_theroy_pipeline(sequences, metadata, deme_identifier,geo):
+    (gamete_probabilities, population_dict) = informationtheory.sequences_to_gamete_prob(sequences, metadata, deme_identifier,geo)
+    print(gamete_probabilities)
+    
+    shannon_entropy_by_deme = informationtheory.demes_shannon_entropy(gamete_probabilities)
+    jsd_by_comp = informationtheory.demes_jsd(gamete_probabilities, population_dict)
+    norm_jsd_by_comp = informationtheory.demes_norm_jsd(gamete_probabilities, population_dict)
+    I_by_comp = informationtheory.demes_info_flow_direction(gamete_probabilities, population_dict)
+    
+    (gamete_probabilities, population_dict) = informationtheory.sequences_to_random_deme_combinations(sequences, metadata, deme_identifier,geo)
+    
+    IR_dict_by_comparison = informationtheory.randomized_information_flow_directionality(gamete_probabilities, I_by_comp)
+    
+    
+    
+    
+    
+    
+    
     return None
 
 
