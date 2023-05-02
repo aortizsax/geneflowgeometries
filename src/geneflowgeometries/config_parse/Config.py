@@ -66,12 +66,21 @@ class Config:
         self.number_generations = config_dict["simulator"]["simulation_time"]
         self.number_simulations = config_dict["simulator"]["number_of_simulations"]
         self.snapshot_times = [
-            1,
-            self.number_of_chromosomes,
-            5 * self.number_of_chromosomes,
-            10 * self.number_of_chromosomes,
-            20 * self.number_of_chromosomes,
-        ]
+        1,
+        int(0.2 * self.number_of_chromosomes),
+        int(0.4 * self.number_of_chromosomes),
+        int(0.6 * self.number_of_chromosomes),
+        int(0.8 * self.number_of_chromosomes),
+        self.number_of_chromosomes,
+        5 * self.number_of_chromosomes,
+        8 * self.number_of_chromosomes,
+        10 * self.number_of_chromosomes,
+        12 * self.number_of_chromosomes,
+        14 * self.number_of_chromosomes,
+        16 * self.number_of_chromosomes,
+        18 * self.number_of_chromosomes,
+        20 * self.number_of_chromosomes,
+    ]
         self.seed = config_dict["simulator"]["seed"]
 
         if self.trait == "continuous":
@@ -193,9 +202,18 @@ def read_args(args):
     start_std = args.standard_deviation
     snapshot_times = [
         1,
+        int(0.2 * number_of_chromosomes),
+        int(0.4 * number_of_chromosomes),
+        int(0.6 * number_of_chromosomes),
+        int(0.8 * number_of_chromosomes),
         number_of_chromosomes,
         5 * number_of_chromosomes,
+        8 * number_of_chromosomes,
         10 * number_of_chromosomes,
+        12 * number_of_chromosomes,
+        14 * number_of_chromosomes,
+        16 * number_of_chromosomes,
+        18 * number_of_chromosomes,
         20 * number_of_chromosomes,
     ]
 
