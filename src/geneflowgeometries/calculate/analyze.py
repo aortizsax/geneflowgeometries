@@ -103,8 +103,8 @@ def information_theroy_pipeline(sequences, metadata, deme_identifier,geo):
     
     jsd_by_comp = informationtheory.demes_jsd(gamete_probabilities, population_dict)
 #    
-#    norm_jsd_by_comp = informationtheory.demes_norm_jsd(gamete_probabilities, population_dict)
-#    I_by_comp = informationtheory.demes_info_flow_direction(gamete_probabilities, population_dict)
+    norm_jsd_by_comp = informationtheory.demes_norm_jsd(gamete_probabilities, population_dict)
+    I_by_comp = informationtheory.demes_info_flow_direction(gamete_probabilities, population_dict)
 #    
 #    (gamete_probabilities, population_dict) = informationtheory.sequences_to_random_deme_combinations(sequences, metadata, deme_identifier,geo)
 #    
@@ -114,6 +114,8 @@ def information_theroy_pipeline(sequences, metadata, deme_identifier,geo):
     #by posisitional allele
     informationtheory.demes_allele_shannon_entropy(pos_allele_probablity_deme_dict)
     informationtheory.demes_allele_jsd(pos_allele_probablity_deme_dict, population_dict)
+    informationtheory.demes_allele_norm_jsd(pos_allele_probablity_deme_dict, population_dict) 
+    informationtheory.demes_allele_info_flow_direction(pos_allele_probablity_deme_dict, population_dict) 
     
     #look at tp 20 geneflowgeometries -c ../tests/config/sequenceconfig.ini -simK 1 -G "chain graph" -R 0.5 -m 0.25 -k 3 -mut 0.0001 -N 20 -L 10 -simT 200
     
