@@ -53,6 +53,7 @@ class Config:
         # pass to local variables
         self.geometry = config_dict["simulator"]["geometry"]
         self.trait = config_dict["simulator"]["simulate_sequences_or_continous"]
+        self.ghost_population_model = config_dict["simulator"]["ghost_population_model"]
         self.number_of_chromosomes = config_dict["simulator"][
             "number_of_chromosomes_per_deme"
         ]
@@ -66,9 +67,9 @@ class Config:
         self.number_generations = config_dict["simulator"]["simulation_time"]
         self.number_simulations = config_dict["simulator"]["number_of_simulations"]
         self.snapshot_times = [
-        1,
-        int(0.2 * self.number_of_chromosomes),
-        int(0.4 * self.number_of_chromosomes),
+       # 1,
+       # int(0.2 * self.number_of_chromosomes),
+       # int(0.4 * self.number_of_chromosomes),
         int(0.6 * self.number_of_chromosomes),
         int(0.8 * self.number_of_chromosomes),
         self.number_of_chromosomes,
@@ -147,7 +148,7 @@ from geneflowgeometries.config_parse.Config import Config
 
 
 class InvalidMigrationRateException(Exception):
-    "Raised when the input value is greater than 1/k, where k is the number of demes"
+    "Raised when the input value is greater than 1/k (complete graph) or 1/3 (chain graph), where k is the number of demes"
     pass
 
 
@@ -179,17 +180,24 @@ def read_args(args):
     simulate_what = args.simulate_sequences_or_continous
     print("Simulating", simulate_what)
 
-    Geometry = args.geometry
+    geometry = args.geometry
+    ghost_population_model = args.ghost_population_model
     number_of_chromosomes = args.number_of_chromosomes_per_deme
     number_of_ploidy = args.number_of_chromosomes_per_invdividual
     number_of_demes = args.number_of_demes
     migration_rate = args.migration_rate
 
     try:
-        if migration_rate > 1 / number_of_demes:
-            raise InvalidMigrationRateException
-        else:
-            print("Valid migration rate")
+        if geometry == "complete graph":
+            if migration_rate > 1 / number_of_demes:
+                raise InvalidMigrationRateException    
+            else:
+                print("Valid migration rate")
+        elif geometry == "chain graph":
+            if migration_rate > 1 / 3:
+                raise InvalidMigrationRateException    
+            else:
+                print("Valid migration rate")
     except InvalidMigrationRateException:
         print("Exception occurred: Invalid migration rate")
         raise SystemExit(1)
@@ -200,22 +208,22 @@ def read_args(args):
     simT = args.simulation_time
     start_mean = args.mean
     start_std = args.standard_deviation
-    snapshot_times = [
-        1,
-        int(0.2 * number_of_chromosomes),
-        int(0.4 * number_of_chromosomes),
-        int(0.6 * number_of_chromosomes),
-        int(0.8 * number_of_chromosomes),
-        number_of_chromosomes,
-        5 * number_of_chromosomes,
-        8 * number_of_chromosomes,
-        10 * number_of_chromosomes,
-        12 * number_of_chromosomes,
-        14 * number_of_chromosomes,
-        16 * number_of_chromosomes,
-        18 * number_of_chromosomes,
-        20 * number_of_chromosomes,
-    ]
+#    snapshot_times = [
+#        1,
+#        int(0.2 * number_of_chromosomes),
+#        int(0.4 * number_of_chromosomes),
+#        int(0.6 * number_of_chromosomes),
+#        int(0.8 * number_of_chromosomes),
+#        number_of_chromosomes,
+#        5 * number_of_chromosomes,
+#        8 * number_of_chromosomes,
+#        10 * number_of_chromosomes,
+#        12 * number_of_chromosomes,
+#        14 * number_of_chromosomes,
+#        16 * number_of_chromosomes,
+#        18 * number_of_chromosomes,
+#        20 * number_of_chromosomes,
+#    ]
 
     # random number
     if args.seed == "random":
@@ -231,7 +239,8 @@ def read_args(args):
         "simulator": {
             "date": date,
             "simulate_sequences_or_continous": simulate_what,
-            "geometry": Geometry,
+            "geometry": geometry,
+            "ghost_population_model":ghost_population_model,
             "number_of_chromosomes_per_deme": number_of_chromosomes,
             "number_of_chromosomes_per_invdividual": number_of_ploidy,
             "number_of_demes": number_of_demes,

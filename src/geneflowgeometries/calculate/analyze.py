@@ -96,27 +96,35 @@ def wright_fis(sequences, metadata, deme_identifier,geo):
     
 def information_theroy_pipeline(sequences, metadata, deme_identifier,geo):
     (gamete_probabilities, population_dict,pos_allele_probablity_deme_dict) = informationtheory.sequences_to_gamete_prob(sequences, metadata, deme_identifier,geo)
-    #print(gamete_probabilities)
     
     #by gamete
-    shannon_entropy_by_deme = informationtheory.demes_shannon_entropy(gamete_probabilities)
+    (shannon_entropy_by_deme, weighted_bool) = informationtheory.demes_shannon_entropy(gamete_probabilities,geo)
+
+        
+    #(jsd_by_comp, perc_network) = informationtheory.demes_jsd(gamete_probabilities, population_dict,geo) 
+#    networkx_edge_list = informationtheory.information_theory_dict_to_pd_df(jsd_by_comp,weighted_bool,geo)
+#    informationtheory.plot_unidirectional_metric(networkx_edge_list) 
+        
+    (norm_jsd_by_comp, perc_network) = informationtheory.demes_norm_jsd(gamete_probabilities, population_dict,geo)
+#    networkx_edge_list = informationtheory.information_theory_dict_to_pd_df(norm_jsd_by_comp,weighted_bool,geo)   
+#    informationtheory.plot_unidirectional_metric(networkx_edge_list)
     
-    jsd_by_comp = informationtheory.demes_jsd(gamete_probabilities, population_dict)
-#    
-    norm_jsd_by_comp = informationtheory.demes_norm_jsd(gamete_probabilities, population_dict)
-    I_by_comp = informationtheory.demes_info_flow_direction(gamete_probabilities, population_dict)
-#    
-#    (gamete_probabilities, population_dict) = informationtheory.sequences_to_random_deme_combinations(sequences, metadata, deme_identifier,geo)
-#    
-#    IR_dict_by_comparison = informationtheory.randomized_information_flow_directionality(gamete_probabilities, I_by_comp)
-#    
+    (I_by_comp , w_dict) = informationtheory.demes_info_flow_direction(gamete_probabilities, population_dict,perc_network,geo)
+    
+    (gamete_probabilities, population_dict) = informationtheory.sequences_to_random_deme_combinations(sequences, metadata, deme_identifier,perc_network,geo)
+    (IR_dict_by_comparison, weighted_bool) = informationtheory.randomized_information_flow_directionality(gamete_probabilities, I_by_comp,geo)
+   
+    print(I_by_comp, IR_dict_by_comparison, w_dict)
+   
+#    networkx_edge_list = informationtheory.information_theory_dict_to_pd_df(IR_dict_by_comparison,weighted_bool,geo)   
+#    informationtheory.plot_bidirectional_metric(networkx_edge_list)
     
     #by posisitional allele
     informationtheory.demes_allele_shannon_entropy(pos_allele_probablity_deme_dict)
-    informationtheory.demes_allele_jsd(pos_allele_probablity_deme_dict, population_dict)
-    informationtheory.demes_allele_norm_jsd(pos_allele_probablity_deme_dict, population_dict) 
-    informationtheory.demes_allele_info_flow_direction(pos_allele_probablity_deme_dict, population_dict) 
-    
+#    informationtheory.demes_allele_jsd(pos_allele_probablity_deme_dict, population_dict)
+#    informationtheory.demes_allele_norm_jsd(pos_allele_probablity_deme_dict, population_dict) 
+#   (I_dict , w_dict) informationtheory.demes_allele_info_flow_direction(pos_allele_probablity_deme_dict, population_dict) 
+#    
     #look at tp 20 geneflowgeometries -c ../tests/config/sequenceconfig.ini -simK 1 -G "chain graph" -R 0.5 -m 0.25 -k 3 -mut 0.0001 -N 20 -L 10 -simT 200
     
     return None

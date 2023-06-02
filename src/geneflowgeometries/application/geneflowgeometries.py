@@ -102,6 +102,7 @@ def main():
     defaults = {
         "simulate_sequences_or_continous": "sequences",
         "geometry": "complete graph",
+        "ghost_population_model":"No ghost",
         "number_of_chromosomes_per_deme": 100,
         "number_of_chromosomes_per_invdividual": 2,
         "number_of_demes": 4,
@@ -150,6 +151,13 @@ def main():
         choices=["complete graph", "chain graph", "random connectivity?"],
         action="store",
         help="Network/graph to simulate. [default=%(default)s].",
+    )
+    main_parser.add_argument(
+        "-gpm",
+        "--ghost-population-model",
+        choices=["No ghost","Equi-bidirectional migration", "Equi-directional migration", "High bidirectional migration","High directional migration"],
+        action="store",
+        help="Ghost population model to simulate. From ... [default=%(default)s].",
     )
     main_parser.add_argument(
         "-N",
@@ -285,6 +293,7 @@ def main():
 
     #    #need override https://gist.github.com/gene1wood/9217725; args, unparsed = parser.parse_known_args()
     #    else:
+    print(main_args)
     configuration = read_args(main_args)
 
     # inialize Simulator instance
